@@ -1,5 +1,6 @@
 import { BARS, ITEMS } from "./items.js"
 import { FISHING_NODES } from "./fishing.js"
+import { POTIONS } from "./potions.js"
 
 const smithingRecipes = {}
 
@@ -63,17 +64,22 @@ export const RECIPES = /** @type {const} */ ({
       ]
     })
   ),
-  brewPotions: {
-    id: "brewPotions",
-    name: "Brew Potions",
-    skill: "alchemy",
-    durationSec: 3.5,
-    in: { herbs: 3 },
-    out: { potions: 1 },
-    xp: 10,
-    requiresBuilding: "alchemistHut",
-    requiresLevel: 1,
-  },
+  ...Object.fromEntries(
+    POTIONS.map((potion) => [
+      `brew_${potion.id}`,
+      {
+        id: `brew_${potion.id}`,
+        name: `Brew ${potion.name}`,
+        skill: "alchemy",
+        durationSec: 3.0,
+        in: potion.ingredients,
+        out: { [potion.id]: 1 },
+        xp: Math.max(6, Math.floor((potion.level ?? 1) * 2.4)),
+        requiresBuilding: "alchemistHut",
+        requiresLevel: potion.level,
+      },
+    ])
+  ),
 })
 
 export function listRecipeIds() {

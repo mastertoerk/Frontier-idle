@@ -1,0 +1,238 @@
+export const POTIONS = [
+  {
+    id: "weakHealingPotion",
+    name: "Weak Healing Potion",
+    level: 1,
+    kind: "heal",
+    amount: 5,
+    cooldownSec: 30,
+    durationSec: 0,
+    ingredients: { sunleaf: 1, boneDust: 1 },
+  },
+  {
+    id: "minorRegeneration",
+    name: "Minor Regeneration",
+    level: 5,
+    kind: "regen",
+    amount: 1,
+    intervalSec: 20,
+    durationSec: 60,
+    cooldownSec: 60,
+    ingredients: { sunleaf: 1, slimeGel: 1 },
+  },
+  {
+    id: "minorAccuracyTonic",
+    name: "Minor Accuracy Tonic",
+    level: 10,
+    kind: "accuracy",
+    value: 0.05,
+    durationSec: 120,
+    ingredients: { sunleaf: 2, ashes: 1 },
+  },
+  {
+    id: "healingPotion",
+    name: "Healing Potion",
+    level: 16,
+    kind: "heal",
+    amount: 10,
+    cooldownSec: 30,
+    durationSec: 0,
+    ingredients: { moonsage: 1, beastBlood: 1 },
+  },
+  {
+    id: "regenerationPotion",
+    name: "Regeneration Potion",
+    level: 20,
+    kind: "regen",
+    amount: 1,
+    intervalSec: 10,
+    durationSec: 90,
+    cooldownSec: 60,
+    ingredients: { moonsage: 1, insectIchor: 1 },
+  },
+  {
+    id: "strengthPotion",
+    name: "Strength Potion",
+    level: 26,
+    kind: "strength",
+    value: 0.1,
+    durationSec: 180,
+    ingredients: { moonsage: 2, ironShavings: 1 },
+  },
+  {
+    id: "greaterHealing",
+    name: "Greater Healing",
+    level: 32,
+    kind: "heal",
+    amount: 18,
+    cooldownSec: 30,
+    durationSec: 0,
+    ingredients: { emberroot: 1, spiritResidue: 1 },
+  },
+  {
+    id: "greaterRegeneration",
+    name: "Greater Regeneration",
+    level: 36,
+    kind: "regen",
+    amount: 1,
+    intervalSec: 6,
+    durationSec: 120,
+    cooldownSec: 60,
+    ingredients: { emberroot: 1, pureSlime: 1 },
+  },
+  {
+    id: "attackPotion",
+    name: "Attack Potion",
+    level: 42,
+    kind: "attack",
+    value: 0.15,
+    durationSec: 240,
+    ingredients: { emberroot: 2, crystalDust: 1 },
+  },
+  {
+    id: "defensePotion",
+    name: "Defense Potion",
+    level: 48,
+    kind: "defense",
+    value: 0.15,
+    durationSec: 240,
+    ingredients: { emberroot: 2, runicAsh: 1 },
+  },
+  {
+    id: "superiorHealing",
+    name: "Superior Healing",
+    level: 52,
+    kind: "heal",
+    amount: 25,
+    cooldownSec: 30,
+    durationSec: 0,
+    ingredients: { frostcap: 1, ancientBlood: 1 },
+  },
+  {
+    id: "battlePotion",
+    name: "Battle Potion",
+    level: 56,
+    kind: "strength",
+    value: 0.2,
+    durationSec: 300,
+    ingredients: { frostcap: 2, lifeEssence: 1 },
+  },
+  {
+    id: "guardianPotion",
+    name: "Guardian Potion",
+    level: 62,
+    kind: "defense",
+    value: 0.25,
+    durationSec: 300,
+    ingredients: { frostcap: 2, runeFragment: 1 },
+  },
+  {
+    id: "vitalityPotion",
+    name: "Vitality Potion",
+    level: 68,
+    kind: "maxHp",
+    amount: 10,
+    durationSec: 300,
+    ingredients: { frostcap: 2, ancientSap: 1 },
+  },
+  {
+    id: "grandHealing",
+    name: "Grand Healing",
+    level: 72,
+    kind: "heal",
+    amount: 30,
+    cooldownSec: 30,
+    durationSec: 0,
+    ingredients: { voidlotus: 1, vitalCore: 1 },
+  },
+  {
+    id: "grandRegeneration",
+    name: "Grand Regeneration",
+    level: 76,
+    kind: "regen",
+    amount: 1,
+    intervalSec: 4,
+    durationSec: 150,
+    cooldownSec: 60,
+    ingredients: { voidlotus: 1, alchemicalCore: 1 },
+  },
+  {
+    id: "precisionPotion",
+    name: "Precision Potion",
+    level: 80,
+    kind: "accuracy",
+    value: 0.3,
+    durationSec: 360,
+    ingredients: { voidlotus: 2, philosophersAsh: 1 },
+  },
+  {
+    id: "fortitudePotion",
+    name: "Fortitude Potion",
+    level: 84,
+    kind: "maxHp",
+    amount: 15,
+    durationSec: 360,
+    ingredients: { voidlotus: 2, worldseedFragment: 1 },
+  },
+  {
+    id: "supremeHealing",
+    name: "Supreme Healing",
+    level: 88,
+    kind: "heal",
+    amount: 35,
+    cooldownSec: 30,
+    durationSec: 0,
+    ingredients: { voidlotus: 2, vitalCore: 2 },
+  },
+  {
+    id: "supremeRegeneration",
+    name: "Supreme Regeneration",
+    level: 92,
+    kind: "regen",
+    amount: 1,
+    intervalSec: 3,
+    durationSec: 180,
+    cooldownSec: 60,
+    ingredients: { voidlotus: 2, alchemicalCore: 2 },
+  },
+  {
+    id: "championsPotion",
+    name: "Champion's Potion",
+    level: 96,
+    kind: "attack",
+    value: 0.3,
+    durationSec: 420,
+    ingredients: { voidlotus: 3, philosophersAsh: 2 },
+  },
+  {
+    id: "elixirOfEquilibrium",
+    name: "Elixir of Equilibrium",
+    level: 99,
+    kind: "accuracy",
+    value: 0.2,
+    durationSec: 420,
+    ingredients: { voidlotus: 3, worldseedFragment: 2 },
+  },
+]
+
+export const POTION_BY_ID = Object.fromEntries(POTIONS.map((p) => [p.id, p]))
+
+export function potionModifiers(state) {
+  const active = state.potion?.active
+  if (!active) {
+    return { powerMult: 1, toughnessMult: 1, accuracyBonus: 0, maxHpBonus: 0 }
+  }
+  if (active.kind === "strength" || active.kind === "attack") {
+    return { powerMult: 1 + (active.value ?? 0), toughnessMult: 1, accuracyBonus: 0, maxHpBonus: 0 }
+  }
+  if (active.kind === "defense") {
+    return { powerMult: 1, toughnessMult: 1 + (active.value ?? 0), accuracyBonus: 0, maxHpBonus: 0 }
+  }
+  if (active.kind === "accuracy") {
+    return { powerMult: 1, toughnessMult: 1, accuracyBonus: active.value ?? 0, maxHpBonus: 0 }
+  }
+  if (active.kind === "maxHp") {
+    return { powerMult: 1, toughnessMult: 1, accuracyBonus: 0, maxHpBonus: active.amount ?? 0 }
+  }
+  return { powerMult: 1, toughnessMult: 1, accuracyBonus: 0, maxHpBonus: 0 }
+}

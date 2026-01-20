@@ -1,5 +1,8 @@
 import { BARS, ITEMS, ORES } from "./items.js"
 import { BURNT_FISH, COOKED_FISH, FISHING_NODES } from "./fishing.js"
+import { FARMING_CROPS } from "./farming.js"
+import { SCAVENGE_REAGENTS } from "./scavenging.js"
+import { POTIONS } from "./potions.js"
 
 export const SKILLS = /** @type {const} */ ({
   woodcutting: {
@@ -23,6 +26,17 @@ export const SKILLS = /** @type {const} */ ({
     baseYieldPerSecond: 0.7,
     yields: {},
   },
+  scavenging: {
+    id: "scavenging",
+    name: "Scavenging",
+    baseXpPerSecond: 3,
+    baseYieldPerSecond: 0.6,
+    yields: {},
+  },
+  farming: {
+    id: "farming",
+    name: "Farming",
+  },
   smithing: {
     id: "smithing",
     name: "Smithing",
@@ -43,8 +57,6 @@ export const SKILLS = /** @type {const} */ ({
 
 const BASE_RESOURCES = {
   wood: { id: "wood", name: "Wood", showInHud: true, category: "material" },
-  herbs: { id: "herbs", name: "Herbs", showInHud: true, category: "material" },
-  potions: { id: "potions", name: "Potions", showInHud: true, category: "consumable" },
   gold: { id: "gold", name: "Gold", showInHud: true, category: "currency" },
 }
 
@@ -61,6 +73,15 @@ function buildResourceCatalog() {
   }
   for (const fish of BURNT_FISH) {
     catalog[fish.id] = { id: fish.id, name: fish.name, showInHud: false, category: "fishBurnt" }
+  }
+  for (const crop of FARMING_CROPS) {
+    catalog[crop.id] = { id: crop.id, name: crop.name, showInHud: false, category: "herb" }
+  }
+  for (const reagent of SCAVENGE_REAGENTS) {
+    catalog[reagent.id] = { id: reagent.id, name: reagent.name, showInHud: false, category: "reagent" }
+  }
+  for (const potion of POTIONS) {
+    catalog[potion.id] = { id: potion.id, name: potion.name, showInHud: false, category: "potion" }
   }
   for (const bar of Object.values(BARS)) {
     catalog[bar.id] = { id: bar.id, name: bar.name, showInHud: true, category: "bar" }
@@ -99,7 +120,7 @@ export const BUILDINGS = /** @type {const} */ ({
     id: "alchemistHut",
     name: "Alchemist Hut",
     desc: "Unlocks potions and improves expeditions.",
-    baseCost: { wood: 50, herbs: 25 },
+    baseCost: { wood: 50, sunleaf: 25 },
     costScale: 1.7,
   },
   barracks: {
@@ -120,7 +141,7 @@ export const BUILDINGS = /** @type {const} */ ({
     id: "scoutLodge",
     name: "Scout Lodge",
     desc: "More loot, fewer nasty surprises.",
-    baseCost: { wood: 90, herbs: 15, gold: 50 },
+    baseCost: { wood: 90, sunleaf: 15, gold: 50 },
     costScale: 1.75,
   },
   townHall: {

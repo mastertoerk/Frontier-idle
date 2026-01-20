@@ -203,11 +203,38 @@ body
     gap: 10px;
 }
 
+.invItem--focused {
+    grid-column: 1 / -1;
+    background: rgba(86, 142, 255, 0.12);
+    border-color: rgba(86, 142, 255, 0.35);
+    flex-direction: column;
+    align-items: stretch;
+}
+
 .invItem__actions {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
     justify-content: flex-end;
+}
+
+.sellPanel {
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.sellSlider {
+    width: 100%;
+}
+
+.sellPanel__meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: rgba(233, 238, 246, 0.68);
+    margin-top: 6px;
 }
 
 .invItem__name {

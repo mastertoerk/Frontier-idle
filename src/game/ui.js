@@ -1,6 +1,9 @@
 import { BUILDINGS, RESOURCES, SKILLS } from "./content.js"
 import { EQUIPMENT_SLOTS, ITEMS, MINING_NODES, TIER_DATA, maxDurabilityForItem, toolPerksForTier } from "./items.js"
 import { COOKED_FISH, FISHING_NODES } from "./fishing.js"
+import { FARMING_CROPS } from "./farming.js"
+import { SCAVENGING_ZONES } from "./scavenging.js"
+import { POTIONS } from "./potions.js"
 import { nextLevelProgress } from "./math.js"
 import { formatInt, formatNumber, formatSeconds } from "./format.js"
 import {
@@ -8,6 +11,9 @@ import {
   buyLegacyUpgrade,
   equipItem,
   foundNewSettlement,
+  harvestCrop,
+  plantCrop,
+  drinkPotion,
   repairItem,
   sellEquippedItem,
   sellResource,
@@ -104,6 +110,8 @@ export function createUI({ root, store }) {
         ? MINING_NODES.find((node) => node.id === state.activity.gatherResource)?.name
         : state.activity.gatherSkill === "fishing"
           ? FISHING_NODES.find((node) => node.id === state.activity.gatherResource)?.name
+          : state.activity.gatherSkill === "scavenging"
+            ? SCAVENGING_ZONES.find((node) => node.id === state.activity.gatherResource)?.name
         : null
     const activeLabel =
       activity === "idle"
@@ -153,7 +161,7 @@ export function createUI({ root, store }) {
 
   function renderSkillSelector(state) {
     const selected = state.ui.selectedSkill ?? "woodcutting"
-    const skills = ["woodcutting", "mining", "fishing", "smithing", "cooking", "alchemy"]
+    const skills = ["woodcutting", "mining", "fishing", "scavenging", "farming", "smithing", "cooking", "alchemy"]
     const rows = skills
       .map((sid) => {
         const active = selected === sid ? "btn btn--tier btn--tier-active" : "btn btn--tier"
@@ -212,6 +220,79 @@ export function createUI({ root, store }) {
             )
             .join("")}
         </div>
+      </div>
+    `
+  }
+
+  function renderScavengingTargets(state) {
+    const scavLevel = nextLevelProgress(state.skills.scavenging?.xp ?? 0).level
+    const unlocked = SCAVENGING_ZONES.filter((zone) => zone.level <= scavLevel)
+    if (unlocked.length === 0) {
+      return `<div class="muted small">No scavenging zones unlocked yet.</div>`
+    }
+    return `
+      <div class="card">
+        <div class="card__title">Scavenging Zones</div>
+        <div class="row">
+          ${unlocked
+            .map(
+              (zone) =>
+                `<button class="btn" data-action="activity-gather" data-skill="scavenging" data-resource="${escapeHtml(
+                  zone.id
+                )}">${escapeHtml(zone.name)}</button>`
+            )
+            .join("")}
+        </div>
+      </div>
+    `
+  }
+
+  function renderFarmingPanel(state) {
+    const farmingLevel = nextLevelProgress(state.skills.farming?.xp ?? 0).level
+    const now = state.meta?.simTimeMs ?? Date.now()
+    const selectedCrop = state.ui.selectedCrop
+    const patches = (state.farming?.patches ?? []).map((patch) => {
+      const crop = FARMING_CROPS.find((c) => c.id === patch.cropId)
+      const ready = patch.cropId && now >= patch.readyAt
+      const status = !crop
+        ? "Empty"
+        : ready
+          ? "Harvestable"
+          : `Growing (${formatSeconds(Math.max(0, (patch.readyAt - now) / 1000))})`
+      return `
+        <div class="invItem invItem--trade">
+          <div>
+            <div class="invItem__name">Patch ${patch.id}</div>
+            <div class="muted small">${crop ? escapeHtml(crop.name) : "None"} | ${status}</div>
+          </div>
+          ${
+            ready
+              ? `<button class="btn btn--small" data-action="farm-harvest" data-patch="${patch.id}">Harvest</button>`
+              : !crop && selectedCrop
+                ? `<button class="btn btn--small" data-action="farm-plant" data-patch="${patch.id}" data-crop="${escapeHtml(
+                    selectedCrop
+                  )}">Plant</button>`
+              : ""
+          }
+        </div>
+      `
+    })
+
+    const cropButtons = FARMING_CROPS.filter((crop) => crop.level <= farmingLevel)
+      .map(
+        (crop) =>
+          `<button class="btn btn--tier ${selectedCrop === crop.id ? "btn--tier-active" : ""}" data-action="farm-select" data-crop="${escapeHtml(
+            crop.id
+          )}">${escapeHtml(crop.name)}</button>`
+      )
+      .join("")
+
+    return `
+      <div class="card">
+        <div class="card__title">Farming Patches</div>
+        <div class="stack">${patches.join("") || `<div class="muted small">No patches yet.</div>`}</div>
+        <div class="muted small">Select a crop, then plant in an empty patch.</div>
+        <div class="row">${cropButtons || `<div class="muted small">No crops unlocked yet.</div>`}</div>
       </div>
     `
   }
@@ -365,11 +446,22 @@ export function createUI({ root, store }) {
         : ""
     let skillPanel = ""
     if (selected === "woodcutting") {
-      skillPanel = `<div class="card"><div class="card__title">Woodcutting</div><div class="muted small">Selecting Woodcutting starts gathering wood.</div></div>`
+      skillPanel = `
+        <div class="card">
+          <div class="card__title">Woodcutting</div>
+          <div class="row">
+            <button class="btn" data-action="activity-gather" data-skill="woodcutting">Start Woodcutting</button>
+          </div>
+        </div>
+      `
     } else if (selected === "mining") {
       skillPanel = renderMiningTargets(state)
     } else if (selected === "fishing") {
       skillPanel = renderFishingTargets(state)
+    } else if (selected === "scavenging") {
+      skillPanel = renderScavengingTargets(state)
+    } else if (selected === "farming") {
+      skillPanel = renderFarmingPanel(state)
     } else if (selected === "smithing") {
       skillPanel = renderSmithing(state)
     } else if (selected === "cooking") {
@@ -494,7 +586,9 @@ export function createUI({ root, store }) {
 	            <div class="pill">Cooked Fish: ${formatInt(
                 COOKED_FISH.reduce((sum, fish) => sum + (state.resources[fish.id] ?? 0), 0)
               )}</div>
-	            <div class="pill">Potions: ${formatInt(state.resources.potions ?? 0)}</div>
+	            <div class="pill">Potions: ${formatInt(
+                POTIONS.reduce((sum, potion) => sum + (state.resources[potion.id] ?? 0), 0)
+              )}</div>
 	          </div>
           <div class="muted small">Gear: Weapon T${formatNumber(playerCombat.weaponTier ?? 0, 1)} | Armor T${formatNumber(
             playerCombat.armorTier ?? 0,
@@ -612,6 +706,9 @@ export function createUI({ root, store }) {
     const rawFishIds = resourceIdsByCategory("fishRaw")
     const cookedFishIds = resourceIdsByCategory("fishCooked")
     const burntFishIds = resourceIdsByCategory("fishBurnt")
+    const potionIds = POTIONS.map((p) => p.id)
+    const herbIds = resourceIdsByCategory("herb")
+    const reagentIds = resourceIdsByCategory("reagent")
     const materialIds = [...oreIds, ...barIds]
     const supplyIds = [
       ...resourceIdsByCategory("material"),
@@ -623,22 +720,52 @@ export function createUI({ root, store }) {
       .filter((id) => (state.resources[id] ?? 0) > 0)
     const forge = state.buildings.forge?.level ?? 0
 
+    const sellState = state.ui.sell
     const materialRows = materialIds
       .filter((rid) => (state.resources[rid] ?? 0) > 0)
       .map((rid) => {
         const r = RESOURCES[rid]
         const v = state.resources[rid] ?? 0
         const price = sellPriceForResource(rid)
+        const isFocused = sellState?.resourceId === rid
+        const sliderUi =
+          isFocused && v > 1
+            ? `
+              <div class="sellPanel">
+                <input class="sellSlider" type="range" min="1" max="${v}" value="${sellState.qty ?? 1}" data-action="sell-qty" data-resource="${escapeHtml(
+                rid
+              )}">
+              <div class="sellPanel__meta">
+                <span data-sell-qty>Qty ${formatInt(sellState.qty ?? 1)}</span>
+                <span data-sell-total>${formatNumber((sellState.qty ?? 1) * price, 2)} gold</span>
+              </div>
+                <div class="row">
+                  <button class="btn btn--small" data-action="sell-confirm" data-resource="${escapeHtml(
+                    rid
+                  )}">Sell</button>
+                  <button class="btn btn--small" data-action="sell-cancel">Cancel</button>
+                </div>
+              </div>
+            `
+            : ""
+        const openAttrs =
+          price > 0 && v > 1 ? ` data-action="sell-open" data-resource="${escapeHtml(rid)}"` : ""
         return `
-          <div class="invItem invItem--trade">
+          <div class="invItem invItem--trade ${isFocused ? "invItem--focused" : ""}"${openAttrs}>
             <div>
               <div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div>
               <div class="invItem__val">${formatInt(v)}</div>
             </div>
-            <button class="btn btn--tiny" data-action="sell-resource" data-resource="${escapeHtml(rid)}">Sell 1 (${formatNumber(
-              price,
-              2
-            )}g)</button>
+            ${
+              price > 0
+                ? v > 1
+                  ? `<div class="muted small">Tap to sell</div>`
+                  : `<button class="btn btn--tiny" data-action="sell-resource" data-resource="${escapeHtml(
+                      rid
+                    )}">Sell 1 (${formatNumber(price, 2)}g)</button>`
+                : ""
+            }
+            ${sliderUi}
           </div>
         `
       })
@@ -661,6 +788,46 @@ export function createUI({ root, store }) {
         const r = RESOURCES[rid]
         const v = state.resources[rid] ?? 0
         return `<div class="invItem"><div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div><div class="invItem__val">${formatInt(v)}</div></div>`
+      })
+      .join("")
+
+    const herbRows = herbIds
+      .filter((rid) => (state.resources[rid] ?? 0) > 0)
+      .map((rid) => {
+        const r = RESOURCES[rid]
+        const v = state.resources[rid] ?? 0
+        return `<div class="invItem"><div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div><div class="invItem__val">${formatInt(v)}</div></div>`
+      })
+      .join("")
+
+    const reagentRows = reagentIds
+      .filter((rid) => (state.resources[rid] ?? 0) > 0)
+      .map((rid) => {
+        const r = RESOURCES[rid]
+        const v = state.resources[rid] ?? 0
+        return `<div class="invItem"><div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div><div class="invItem__val">${formatInt(v)}</div></div>`
+      })
+      .join("")
+
+    const now = state.meta?.simTimeMs ?? Date.now()
+    const cooldowns = state.potion?.cooldowns ?? { healingUntil: 0, regenUntil: 0 }
+    const potionRows = POTIONS.filter((p) => (state.resources[p.id] ?? 0) > 0)
+      .map((potion) => {
+        const v = state.resources[potion.id] ?? 0
+        const onHealCd = potion.kind === "heal" && now < (cooldowns.healingUntil ?? 0)
+        const onRegenCd = potion.kind === "regen" && now < (cooldowns.regenUntil ?? 0)
+        const disabled = onHealCd || onRegenCd
+        return `
+          <div class="invItem invItem--trade">
+            <div>
+              <div class="invItem__name">${escapeHtml(potion.name)}</div>
+              <div class="muted small">Lv ${potion.level} | ${formatInt(v)} owned</div>
+            </div>
+            <button class="btn btn--tiny" data-action="drink-potion" data-potion="${escapeHtml(
+              potion.id
+            )}" ${disabled ? "disabled" : ""}>Drink</button>
+          </div>
+        `
       })
       .join("")
 
@@ -689,8 +856,31 @@ export function createUI({ root, store }) {
         const equippedId = item?.slot ? state.equipment[item.slot]?.id : null
         const alreadyEquipped = equippedId === rid
         const price = sellPriceForResource(rid)
+        const isFocused = sellState?.resourceId === rid
+        const sliderUi =
+          isFocused && v > 1 && price > 0
+            ? `
+              <div class="sellPanel">
+                <input class="sellSlider" type="range" min="1" max="${v}" value="${sellState.qty ?? 1}" data-action="sell-qty" data-resource="${escapeHtml(
+                rid
+              )}">
+              <div class="sellPanel__meta">
+                <span data-sell-qty>Qty ${formatInt(sellState.qty ?? 1)}</span>
+                <span data-sell-total>${formatNumber((sellState.qty ?? 1) * price, 2)} gold</span>
+              </div>
+                <div class="row">
+                  <button class="btn btn--small" data-action="sell-confirm" data-resource="${escapeHtml(
+                    rid
+                  )}">Sell</button>
+                  <button class="btn btn--small" data-action="sell-cancel">Cancel</button>
+                </div>
+              </div>
+            `
+            : ""
+        const openAttrs =
+          price > 0 && v > 1 ? ` data-action="sell-open" data-resource="${escapeHtml(rid)}"` : ""
         return `
-          <div class="invItem invItem--gear">
+          <div class="invItem invItem--gear ${isFocused ? "invItem--focused" : ""}"${openAttrs}>
             <div>
               <div class="invItem__name">${escapeHtml(item?.name ?? rid)}</div>
               <div class="muted small">Tier ${item?.tier ?? "?"} | ${formatInt(v)} owned</div>
@@ -699,11 +889,17 @@ export function createUI({ root, store }) {
               <button class="btn btn--small" data-action="equip-item" data-item="${escapeHtml(rid)}" ${
                 alreadyEquipped ? "disabled" : ""
               }>${alreadyEquipped ? "Equipped" : "Equip"}</button>
-              <button class="btn btn--tiny" data-action="sell-resource" data-resource="${escapeHtml(rid)}">Sell 1 (${formatNumber(
-                price,
-                2
-              )}g)</button>
+              ${
+                price > 0
+                  ? v > 1
+                    ? `<div class="muted small">Tap to sell</div>`
+                    : `<button class="btn btn--tiny" data-action="sell-resource" data-resource="${escapeHtml(
+                        rid
+                      )}">Sell 1 (${formatNumber(price, 2)}g)</button>`
+                  : ""
+              }
             </div>
+            ${sliderUi}
           </div>
         `
       })
@@ -762,12 +958,24 @@ export function createUI({ root, store }) {
           ${rawFishRows ? `<div class="invGrid">${rawFishRows}</div>` : `<div class="muted small">No raw fish yet.</div>`}
         </div>
         <div class="card">
+          <div class="card__title">Herbs</div>
+          ${herbRows ? `<div class="invGrid">${herbRows}</div>` : `<div class="muted small">No herbs yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Reagents</div>
+          ${reagentRows ? `<div class="invGrid">${reagentRows}</div>` : `<div class="muted small">No reagents yet.</div>`}
+        </div>
+        <div class="card">
           <div class="card__title">Cooked Fish</div>
           ${cookedFishRows ? `<div class="invGrid">${cookedFishRows}</div>` : `<div class="muted small">No cooked fish yet.</div>`}
         </div>
         <div class="card">
           <div class="card__title">Burnt Fish</div>
           ${burntFishRows ? `<div class="invGrid">${burntFishRows}</div>` : `<div class="muted small">No burnt fish yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Potions</div>
+          ${potionRows ? `<div class="invGrid invGrid--gear">${potionRows}</div>` : `<div class="muted small">No potions yet.</div>`}
         </div>
         <div class="card">
           <div class="card__title">Supplies</div>
@@ -982,6 +1190,34 @@ export function createUI({ root, store }) {
       return
     }
 
+    if (action === "sell-open") {
+      const resourceId = target.getAttribute("data-resource")
+      store.update((s) => {
+        const owned = s.resources[resourceId] ?? 0
+        if (owned <= 1) return
+        s.ui.sell = { resourceId, qty: Math.min(1, owned) }
+      })
+      return
+    }
+
+    if (action === "sell-confirm") {
+      const resourceId = target.getAttribute("data-resource")
+      store.update((s) => {
+        const owned = s.resources[resourceId] ?? 0
+        const qty = s.ui.sell?.resourceId === resourceId ? s.ui.sell.qty ?? 1 : 1
+        sellResource(s, resourceId, Math.min(owned, qty))
+        s.ui.sell = null
+      })
+      return
+    }
+
+    if (action === "sell-cancel") {
+      store.update((s) => {
+        s.ui.sell = null
+      })
+      return
+    }
+
     if (action === "sell-resource") {
       const resourceId = target.getAttribute("data-resource")
       store.update((s) => sellResource(s, resourceId, 1))
@@ -991,6 +1227,33 @@ export function createUI({ root, store }) {
     if (action === "sell-equipped") {
       const slot = target.getAttribute("data-slot")
       store.update((s) => sellEquippedItem(s, slot))
+      return
+    }
+
+    if (action === "drink-potion") {
+      const potionId = target.getAttribute("data-potion")
+      store.update((s) => drinkPotion(s, potionId))
+      return
+    }
+
+    if (action === "farm-select") {
+      const cropId = target.getAttribute("data-crop")
+      store.update((s) => {
+        s.ui.selectedCrop = s.ui.selectedCrop === cropId ? null : cropId
+      })
+      return
+    }
+
+    if (action === "farm-plant") {
+      const patchId = Number(target.getAttribute("data-patch") || 0)
+      const cropId = target.getAttribute("data-crop")
+      store.update((s) => plantCrop(s, cropId, patchId))
+      return
+    }
+
+    if (action === "farm-harvest") {
+      const patchId = Number(target.getAttribute("data-patch") || 0)
+      store.update((s) => harvestCrop(s, patchId))
       return
     }
 
@@ -1007,6 +1270,28 @@ export function createUI({ root, store }) {
     if (e.detail && performance.now() < suppressClickUntil) return
     const target = e.target?.closest?.("[data-action]")
     handleAction(target)
+  }
+
+  function onInput(e) {
+    const target = e.target?.closest?.("[data-action]")
+    if (!target) return
+    const action = target.getAttribute("data-action")
+    if (action !== "sell-qty") return
+    const resourceId = target.getAttribute("data-resource")
+    const value = Number(target.value || 1)
+    const state = store.getState()
+    if (!state.ui.sell || state.ui.sell.resourceId !== resourceId) return
+    const owned = state.resources[resourceId] ?? 0
+    const qty = Math.max(1, Math.min(owned, Math.floor(value)))
+    state.ui.sell.qty = qty
+    const price = sellPriceForResource(resourceId)
+    const panel = target.closest(".sellPanel")
+    if (panel) {
+      const qtyEl = panel.querySelector("[data-sell-qty]")
+      const totalEl = panel.querySelector("[data-sell-total]")
+      if (qtyEl) qtyEl.textContent = `Qty ${formatInt(qty)}`
+      if (totalEl) totalEl.textContent = `${formatNumber(qty * price, 2)} gold`
+    }
   }
 
   function onPointerUp(e) {
@@ -1047,6 +1332,7 @@ export function createUI({ root, store }) {
   }
 
   root.addEventListener("click", onClick)
+  root.addEventListener("input", onInput)
   root.addEventListener("pointerup", onPointerUp)
   root.addEventListener("scroll", onScroll, { passive: true })
   root.addEventListener("touchstart", onTouchStart, { passive: true })
@@ -1061,6 +1347,7 @@ export function createUI({ root, store }) {
   return {
     destroy() {
       root.removeEventListener("click", onClick)
+      root.removeEventListener("input", onInput)
       root.removeEventListener("pointerup", onPointerUp)
       root.removeEventListener("scroll", onScroll)
       root.removeEventListener("touchstart", onTouchStart)

@@ -1,6 +1,6 @@
 import { listBuildingIds, listResourceIds, listSkillIds } from "./content.js"
 
-export const SAVE_VERSION = 3
+export const SAVE_VERSION = 5
 
 export function createDefaultState(now = Date.now()) {
   const skills = {}
@@ -22,7 +22,6 @@ export function createDefaultState(now = Date.now()) {
   resources.wood = 20
   resources.dullstoneOre = 8
   resources.flickerOre = 6
-  resources.herbs = 5
 
   return {
     version: SAVE_VERSION,
@@ -36,6 +35,8 @@ export function createDefaultState(now = Date.now()) {
       tab: "town", // town | skills | expedition | prestige | settings
       smithingTier: 1,
       selectedSkill: "woodcutting",
+      selectedCrop: null,
+      sell: null,
       log: [],
     },
     legacy: {
@@ -65,6 +66,20 @@ export function createDefaultState(now = Date.now()) {
       gatherProgressSec: 0,
       gatherIntervalSec: 1,
       craft: { recipeId: "smelt_dullflickBar" },
+    },
+    potion: {
+      active: null,
+      cooldowns: {
+        healingUntil: 0,
+        regenUntil: 0,
+      },
+    },
+    farming: {
+      patches: [
+        { id: 1, cropId: null, plantedAt: 0, readyAt: 0 },
+        { id: 2, cropId: null, plantedAt: 0, readyAt: 0 },
+        { id: 3, cropId: null, plantedAt: 0, readyAt: 0 },
+      ],
     },
     expedition: {
       active: false,

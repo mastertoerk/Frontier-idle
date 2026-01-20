@@ -1,6 +1,9 @@
 import { BUILDINGS, RESOURCES, SKILLS } from "./content.js"
 import { ITEMS, MINING_NODES, maxDurabilityForItem } from "./items.js"
 import { FISHING_NODES } from "./fishing.js"
+import { FARMING_CROPS, cropYield } from "./farming.js"
+import { SCAVENGING_ZONES } from "./scavenging.js"
+import { POTION_BY_ID } from "./potions.js"
 import { sellPriceForEquipped, sellPriceForResource } from "./economy.js"
 import { scaleCost, canAfford, payCost, nextLevelProgress, levelFromXp } from "./math.js"
 import { pushLog } from "./log.js"
@@ -33,17 +36,88 @@ export function startGather(state, skillId, resourceId = null) {
     if (skillLevel < node.level) return
     gatherResource = node.id
   }
+  if (skillId === "scavenging") {
+    const targetId = resourceId ?? state.activity.gatherResource
+    const zone = SCAVENGING_ZONES.find((entry) => entry.id === targetId) ?? SCAVENGING_ZONES[0]
+    if (!zone) return
+    if (skillLevel < zone.level) return
+    gatherResource = zone.id
+  }
   state.activity.type = "gather"
   state.activity.gatherSkill = skillId
   state.activity.gatherResource = gatherResource
   state.activity.gatherProgressSec = 0
-  state.activity.gatherIntervalSec = 1
+  state.activity.gatherIntervalSec = skillId === "scavenging" ? 2 : 1
   const targetLabel =
-    (skillId === "mining" || skillId === "fishing") && gatherResource
+    (skillId === "mining" || skillId === "fishing" || skillId === "scavenging") && gatherResource
       ? ` (${(MINING_NODES.find((entry) => entry.id === gatherResource)?.name ??
-          FISHING_NODES.find((entry) => entry.id === gatherResource)?.name) ?? "Target"})`
+          FISHING_NODES.find((entry) => entry.id === gatherResource)?.name ??
+          SCAVENGING_ZONES.find((entry) => entry.id === gatherResource)?.name) ?? "Target"})`
       : ""
   pushLog(state, `Gathering: ${(SKILLS[skillId]?.name ?? skillId)}${targetLabel}.`)
+}
+
+export function plantCrop(state, cropId, patchId) {
+  const crop = FARMING_CROPS.find((c) => c.id === cropId)
+  if (!crop) return
+  const patch = state.farming?.patches?.find((p) => p.id === patchId)
+  if (!patch || patch.cropId) return
+  const level = levelFromXp(state.skills.farming?.xp ?? 0)
+  if (level < crop.level) return
+  const now = state.meta?.simTimeMs ?? Date.now()
+  patch.cropId = crop.id
+  patch.plantedAt = now
+  patch.readyAt = now + crop.growSec * 1000
+  pushLog(state, `Planted ${crop.name}.`)
+}
+
+export function harvestCrop(state, patchId) {
+  const patch = state.farming?.patches?.find((p) => p.id === patchId)
+  if (!patch || !patch.cropId) return
+  const crop = FARMING_CROPS.find((c) => c.id === patch.cropId)
+  if (!crop) return
+  const now = state.meta?.simTimeMs ?? Date.now()
+  if (now < patch.readyAt) return
+  const level = levelFromXp(state.skills.farming?.xp ?? 0)
+  const amount = cropYield({ crop, farmingLevel: level })
+  state.resources[crop.id] = (state.resources[crop.id] ?? 0) + amount
+  state.skills.farming.xp += crop.tier * 12
+  patch.cropId = null
+  patch.plantedAt = 0
+  patch.readyAt = 0
+  pushLog(state, `Harvested ${amount} ${crop.name}.`)
+}
+
+export function drinkPotion(state, potionId) {
+  const potion = POTION_BY_ID[potionId]
+  if (!potion) return
+  const now = state.meta?.simTimeMs ?? Date.now()
+  const cooldowns = state.potion?.cooldowns ?? { healingUntil: 0, regenUntil: 0 }
+  if (potion.kind === "heal" && now < (cooldowns.healingUntil ?? 0)) return
+  if (potion.kind === "regen" && now < (cooldowns.regenUntil ?? 0)) return
+  if ((state.resources[potionId] ?? 0) <= 0) return
+
+  state.resources[potionId] -= 1
+  const active = {
+    ...potion,
+    startedAt: now,
+    endsAt: potion.durationSec ? now + potion.durationSec * 1000 : now,
+    nextTickAt: now + (potion.intervalSec ?? 0) * 1000,
+  }
+  state.potion.active = active
+
+  if (potion.kind === "heal") {
+    cooldowns.healingUntil = now + (potion.cooldownSec ?? 30) * 1000
+    const combat = state.expedition?.room?.combat
+    if (combat) {
+      combat.playerHp = Math.min(combat.playerMaxHp, combat.playerHp + potion.amount)
+    }
+  } else if (potion.kind === "regen") {
+    cooldowns.regenUntil = now + (potion.cooldownSec ?? 60) * 1000
+  }
+
+  state.potion.cooldowns = cooldowns
+  pushLog(state, `Drank ${potion.name}.`)
 }
 
 export function startCraft(state, recipeId) {

@@ -1,6 +1,7 @@
 import { SKILLS } from "./content.js"
 import { ITEMS, MINING_NODES, toolPerksForTier, maxDurabilityForItem } from "./items.js"
 import { FISHING_NODES, burnChanceFor } from "./fishing.js"
+import { SCAVENGING_ZONES } from "./scavenging.js"
 import { canAfford, payCost, nextLevelProgress } from "./math.js"
 import { computeModifiers } from "./modifiers.js"
 import { pushLog } from "./log.js"
@@ -44,10 +45,10 @@ function tickGather(state, dtSec) {
 
   state.activity.gatherIntervalSec = state.activity.gatherIntervalSec ?? 1
   state.activity.gatherProgressSec = state.activity.gatherProgressSec ?? 0
-  state.activity.gatherProgressSec += dtSec
-  if (state.activity.gatherProgressSec >= state.activity.gatherIntervalSec) {
-    state.activity.gatherProgressSec %= state.activity.gatherIntervalSec
-  }
+  const interval = Math.max(0.2, state.activity.gatherIntervalSec)
+  const elapsed = state.activity.gatherProgressSec + dtSec * eff
+  const actions = Math.floor(elapsed / interval)
+  state.activity.gatherProgressSec = elapsed % interval
 
   if (skillId === "mining") {
     const targetId = state.activity.gatherResource ?? MINING_NODES[0]?.id
@@ -87,6 +88,21 @@ function tickGather(state, dtSec) {
     return
   }
 
+  if (skillId === "scavenging") {
+    const targetId = state.activity.gatherResource ?? SCAVENGING_ZONES[0]?.id
+    const zone = SCAVENGING_ZONES.find((entry) => entry.id === targetId)
+    if (!zone) return
+    const totalRolls = Math.max(0, Math.round(actions * (zone.rolls ?? 1) * mods.gatherYieldMult))
+    if (totalRolls > 0) {
+      for (let i = 0; i < totalRolls; i++) {
+        const idx = Math.floor(Math.random() * zone.reagents.length)
+        const reagent = zone.reagents[idx]
+        if (reagent) addResource(state, reagent.id, 1)
+      }
+      addXp(state, skillId, zone.xp * totalRolls * mods.gatherXpMult)
+    }
+    return
+  }
   if (skillId === "woodcutting") {
     const axe = state.equipment.axe
     const toolTier = ITEMS[axe?.id]?.tier ?? 0
@@ -187,6 +203,10 @@ export function tickSimulation(state, dtSec) {
   const dt = Math.max(0, Math.min(1, dtSec))
 
   state.meta.simTimeMs = (state.meta.simTimeMs ?? Date.now()) + dt * 1000
+
+  if (state.potion?.active?.endsAt && state.meta.simTimeMs >= state.potion.active.endsAt) {
+    state.potion.active = null
+  }
 
   // Clear injury flag if time passed (kept as sim-time timestamp).
   if ((state._injuredUntil ?? 0) <= state.meta.simTimeMs) state._injuredUntil = 0

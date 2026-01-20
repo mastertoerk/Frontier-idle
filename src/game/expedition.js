@@ -97,12 +97,10 @@ function awardLoot(state, { difficulty, isBoss, lootMult }) {
   const mods = computeModifiers(state)
   const totalLootMult = mods.lootMult * lootMult
   const gold = Math.ceil((6 + 5 * difficulty + (isBoss ? 20 : 0)) * totalLootMult)
-  const fish = Math.random() < 0.65 ? Math.ceil((1 + difficulty * 0.6) * totalLootMult) : 0
-  const herbs = Math.random() < 0.4 ? Math.ceil((1 + difficulty * 0.4) * totalLootMult) : 0
+  const fish = Math.random() < 0.25 ? Math.ceil((1 + difficulty * 0.3) * totalLootMult) : 0
   addResourceCapped(state, "gold", gold)
   addResourceCapped(state, "pebblefin", fish)
-  addResourceCapped(state, "herbs", herbs)
-  return { gold, fish, herbs }
+  return { gold, fish }
 }
 
 function applyInjuryIfAny(state, baseChance) {
@@ -169,6 +167,26 @@ function applyDurabilityLoss(state, slot, amount) {
 function tickCombatRoom(state, room, dtSec) {
   ensureCombatRoomInitialized(state, room)
   const c = room.combat
+  const live = computePlayerCombat(state)
+  c.playerPower = live.power
+  c.playerToughness = live.toughness
+  c.playerInterval = live.attackInterval
+  c.playerMaxHp = live.maxHp
+  const accuracyBonus = live.accuracyBonus ?? 0
+  if (c.playerHp > c.playerMaxHp) c.playerHp = c.playerMaxHp
+
+  const activePotion = state.potion?.active
+  if (activePotion?.kind === "regen" && c.playerHp < c.playerMaxHp) {
+    const now = state.meta?.simTimeMs ?? Date.now()
+    const interval = (activePotion.intervalSec ?? 10) * 1000
+    let tickAt = activePotion.nextTickAt ?? now
+    while (tickAt <= now && c.playerHp < c.playerMaxHp) {
+      c.playerHp = Math.min(c.playerMaxHp, c.playerHp + (activePotion.amount ?? 1))
+      tickAt += interval
+    }
+    activePotion.nextTickAt = tickAt
+  }
+
   if (!c.started) {
     c.started = true
     pushFeed(state, `${c.enemyName} appears!`)
@@ -183,14 +201,6 @@ function tickCombatRoom(state, room, dtSec) {
     }
   }
 
-  // Auto-potion at low HP.
-  if ((state.resources.potions ?? 0) > 0 && c.playerHp / c.playerMaxHp < 0.35) {
-    state.resources.potions -= 1
-    const heal = Math.ceil(c.playerMaxHp * 0.35)
-    c.playerHp = Math.min(c.playerMaxHp, c.playerHp + heal)
-    pushFeed(state, `You drink a potion and heal ${heal}.`)
-  }
-
   c.playerCd -= dtSec
   c.enemyCd -= dtSec
 
@@ -203,7 +213,10 @@ function tickCombatRoom(state, room, dtSec) {
       // Player attacks
       c.playerCd += c.playerInterval
       const r = rngNextFloat(c.rng)
-      const hitChance = Math.max(0.55, Math.min(0.95, 0.72 + (c.playerPower - c.enemyPower) * 0.04))
+      const hitChance = Math.max(
+        0.55,
+        Math.min(0.95, 0.72 + (c.playerPower - c.enemyPower) * 0.04 + accuracyBonus)
+      )
       if (r > hitChance) {
         pushFeed(state, `You miss.`)
       } else {
@@ -270,10 +283,7 @@ function tickCombatRoom(state, room, dtSec) {
   applyInjuryIfAny(state, injuryChance)
 
   pushFeed(state, `Defeated ${c.enemyName}.`)
-  pushFeed(
-    state,
-    `Loot: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`
-  )
+  pushFeed(state, `Loot: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}.`)
   pushLog(state, `${isBoss ? "Boss defeated" : "Won fight"}: +${Math.floor(baseXp)} combat XP, +${loot.gold} gold.`)
 
   room.resolved = true
@@ -377,15 +387,9 @@ export function tickExpedition(state, dtSec) {
     room.progressSec += dtSec * speedMult
     if (room.progressSec >= room.durationSec) {
       const loot = awardLoot(state, { difficulty: room.difficulty, isBoss: false, lootMult: room.lootMult })
-      pushLog(
-        state,
-        `Found treasure: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`
-      )
+      pushLog(state, `Found treasure: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}.`)
       pushFeed(state, "You find a hidden cache.")
-      pushFeed(
-        state,
-        `Loot: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`
-      )
+      pushFeed(state, `Loot: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}.`)
       room.resolved = true
     }
   } else if (room.type === "combat" || room.type === "boss") {
