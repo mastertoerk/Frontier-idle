@@ -1,4 +1,5 @@
 import { BARS, ITEMS, ORES } from "./items.js"
+import { BURNT_FISH, COOKED_FISH, FISHING_NODES } from "./fishing.js"
 
 export const SKILLS = /** @type {const} */ ({
   woodcutting: {
@@ -14,6 +15,13 @@ export const SKILLS = /** @type {const} */ ({
     baseXpPerSecond: 3,
     baseYieldPerSecond: 0.8,
     yields: { dullstoneOre: 1 },
+  },
+  fishing: {
+    id: "fishing",
+    name: "Fishing",
+    baseXpPerSecond: 3,
+    baseYieldPerSecond: 0.7,
+    yields: {},
   },
   smithing: {
     id: "smithing",
@@ -37,8 +45,6 @@ const BASE_RESOURCES = {
   wood: { id: "wood", name: "Wood", showInHud: true, category: "material" },
   herbs: { id: "herbs", name: "Herbs", showInHud: true, category: "material" },
   potions: { id: "potions", name: "Potions", showInHud: true, category: "consumable" },
-  meat: { id: "meat", name: "Raw Meat", showInHud: true, category: "material" },
-  rations: { id: "rations", name: "Rations", showInHud: true, category: "consumable" },
   gold: { id: "gold", name: "Gold", showInHud: true, category: "currency" },
 }
 
@@ -46,6 +52,15 @@ function buildResourceCatalog() {
   const catalog = { ...BASE_RESOURCES }
   for (const ore of Object.values(ORES)) {
     catalog[ore.id] = { id: ore.id, name: ore.name, showInHud: true, category: "ore" }
+  }
+  for (const fish of FISHING_NODES) {
+    catalog[fish.rawId] = { id: fish.rawId, name: fish.name, showInHud: false, category: "fishRaw" }
+  }
+  for (const fish of COOKED_FISH) {
+    catalog[fish.id] = { id: fish.id, name: fish.name, showInHud: false, category: "fishCooked" }
+  }
+  for (const fish of BURNT_FISH) {
+    catalog[fish.id] = { id: fish.id, name: fish.name, showInHud: false, category: "fishBurnt" }
   }
   for (const bar of Object.values(BARS)) {
     catalog[bar.id] = { id: bar.id, name: bar.name, showInHud: true, category: "bar" }
@@ -63,7 +78,7 @@ export const BUILDINGS = /** @type {const} */ ({
     id: "campfire",
     name: "Campfire",
     desc: "Improves cooking and recovery.",
-    baseCost: { wood: 30, meat: 10 },
+    baseCost: { wood: 30, pebblefin: 10 },
     costScale: 1.5,
   },
   workshop: {

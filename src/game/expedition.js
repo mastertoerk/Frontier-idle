@@ -4,6 +4,7 @@ import { nextLevelProgress } from "./math.js"
 import { computePlayerCombat } from "./combat.js"
 import { pushLog } from "./log.js"
 import { ITEMS, ARMOR_SLOTS, maxDurabilityForItem } from "./items.js"
+import { COOKED_FISH } from "./fishing.js"
 
 const ENEMIES_BY_TIER = [
   ["Slime", "Boar", "Wolf", "Giant Rat"],
@@ -96,12 +97,12 @@ function awardLoot(state, { difficulty, isBoss, lootMult }) {
   const mods = computeModifiers(state)
   const totalLootMult = mods.lootMult * lootMult
   const gold = Math.ceil((6 + 5 * difficulty + (isBoss ? 20 : 0)) * totalLootMult)
-  const meat = Math.random() < 0.65 ? Math.ceil((1 + difficulty * 0.6) * totalLootMult) : 0
+  const fish = Math.random() < 0.65 ? Math.ceil((1 + difficulty * 0.6) * totalLootMult) : 0
   const herbs = Math.random() < 0.4 ? Math.ceil((1 + difficulty * 0.4) * totalLootMult) : 0
   addResourceCapped(state, "gold", gold)
-  addResourceCapped(state, "meat", meat)
+  addResourceCapped(state, "pebblefin", fish)
   addResourceCapped(state, "herbs", herbs)
-  return { gold, meat, herbs }
+  return { gold, fish, herbs }
 }
 
 function applyInjuryIfAny(state, baseChance) {
@@ -145,6 +146,14 @@ function ensureCombatRoomInitialized(state, room) {
   }
 }
 
+function findCookedFish(state, preferHighest = false) {
+  const list = [...COOKED_FISH].sort((a, b) => (preferHighest ? b.heal - a.heal : a.heal - b.heal))
+  for (const fish of list) {
+    if ((state.resources[fish.id] ?? 0) > 0) return fish
+  }
+  return null
+}
+
 function applyDurabilityLoss(state, slot, amount) {
   const eq = state.equipment[slot]
   if (!eq?.id) return
@@ -163,6 +172,15 @@ function tickCombatRoom(state, room, dtSec) {
   if (!c.started) {
     c.started = true
     pushFeed(state, `${c.enemyName} appears!`)
+  }
+
+  if (c.playerHp / c.playerMaxHp < 0.55) {
+    const fish = findCookedFish(state, true)
+    if (fish) {
+      state.resources[fish.id] -= 1
+      c.playerHp = Math.min(c.playerMaxHp, c.playerHp + fish.heal)
+      pushFeed(state, `You eat ${fish.name} and heal ${fish.heal}.`)
+    }
   }
 
   // Auto-potion at low HP.
@@ -252,7 +270,10 @@ function tickCombatRoom(state, room, dtSec) {
   applyInjuryIfAny(state, injuryChance)
 
   pushFeed(state, `Defeated ${c.enemyName}.`)
-  pushFeed(state, `Loot: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
+  pushFeed(
+    state,
+    `Loot: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`
+  )
   pushLog(state, `${isBoss ? "Boss defeated" : "Won fight"}: +${Math.floor(baseXp)} combat XP, +${loot.gold} gold.`)
 
   room.resolved = true
@@ -261,8 +282,8 @@ function tickCombatRoom(state, room, dtSec) {
 
 export function startExpedition(state, { risk = 1 }) {
   const now = Date.now()
-  if ((state.resources.rations ?? 0) > 0) state.resources.rations -= 1
-  else if ((state.resources.meat ?? 0) > 0) state.resources.meat -= 1
+  const fish = findCookedFish(state, false)
+  if (fish) state.resources[fish.id] -= 1
   state.activity.type = "expedition"
   state.expedition.active = true
   state.expedition.risk = Math.max(1, Math.min(3, risk))
@@ -341,20 +362,30 @@ export function tickExpedition(state, dtSec) {
   if (room.type === "rest") {
     room.progressSec += dtSec * speedMult
     if (room.progressSec >= room.durationSec) {
-      const used = state.resources.rations > 0
-      if (used) state.resources.rations -= 1
-      if (used) pushLog(state, "Rested and used 1 ration.")
-      else pushLog(state, "Rested (no rations).")
-      pushFeed(state, used ? "You rest and eat a ration." : "You rest for a moment.")
+      const fish = findCookedFish(state, false)
+      if (fish) {
+        state.resources[fish.id] -= 1
+        pushLog(state, `Rested and ate ${fish.name}.`)
+        pushFeed(state, `You rest and eat ${fish.name}.`)
+      } else {
+        pushLog(state, "Rested (no cooked fish).")
+        pushFeed(state, "You rest for a moment.")
+      }
       room.resolved = true
     }
   } else if (room.type === "treasure") {
     room.progressSec += dtSec * speedMult
     if (room.progressSec >= room.durationSec) {
       const loot = awardLoot(state, { difficulty: room.difficulty, isBoss: false, lootMult: room.lootMult })
-      pushLog(state, `Found treasure: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
+      pushLog(
+        state,
+        `Found treasure: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`
+      )
       pushFeed(state, "You find a hidden cache.")
-      pushFeed(state, `Loot: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
+      pushFeed(
+        state,
+        `Loot: +${loot.gold} gold${loot.fish ? `, +${loot.fish} Pebblefin` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`
+      )
       room.resolved = true
     }
   } else if (room.type === "combat" || room.type === "boss") {

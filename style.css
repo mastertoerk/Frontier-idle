@@ -196,6 +196,20 @@ body
     gap: 10px;
 }
 
+.invItem--trade {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.invItem__actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .invItem__name {
     font-size: 12px;
     color: rgba(233, 238, 246, 0.72);

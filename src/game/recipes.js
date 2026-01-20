@@ -1,4 +1,5 @@
 import { BARS, ITEMS } from "./items.js"
+import { FISHING_NODES } from "./fishing.js"
 
 const smithingRecipes = {}
 
@@ -39,17 +40,29 @@ for (const item of Object.values(ITEMS)) {
 
 export const RECIPES = /** @type {const} */ ({
   ...smithingRecipes,
-  cookRations: {
-    id: "cookRations",
-    name: "Cook Rations",
-    skill: "cooking",
-    durationSec: 2.0,
-    in: { meat: 2 },
-    out: { rations: 1 },
-    xp: 7,
-    requiresBuilding: "campfire",
-    requiresLevel: 1,
-  },
+  ...Object.fromEntries(
+    FISHING_NODES.map((fish) => {
+      const id = `cook_${fish.rawId}`
+      return [
+        id,
+        {
+          id,
+          name: `Cook ${fish.name}`,
+          skill: "cooking",
+          durationSec: 2.0,
+          in: { [fish.rawId]: 1 },
+          out: {},
+          xp: fish.cookingXp,
+          requiresBuilding: "campfire",
+          requiresLevel: fish.cookingLevel,
+          special: "cookFish",
+          cookedId: fish.cookedId,
+          burntId: fish.burntId,
+          fishLevel: fish.level,
+        },
+      ]
+    })
+  ),
   brewPotions: {
     id: "brewPotions",
     name: "Brew Potions",

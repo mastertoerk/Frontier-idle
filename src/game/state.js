@@ -1,6 +1,6 @@
 import { listBuildingIds, listResourceIds, listSkillIds } from "./content.js"
 
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 export function createDefaultState(now = Date.now()) {
   const skills = {}
@@ -22,7 +22,6 @@ export function createDefaultState(now = Date.now()) {
   resources.wood = 20
   resources.dullstoneOre = 8
   resources.flickerOre = 6
-  resources.meat = 5
   resources.herbs = 5
 
   return {
@@ -63,6 +62,8 @@ export function createDefaultState(now = Date.now()) {
       type: "idle", // idle | gather | craft | expedition
       gatherSkill: "woodcutting",
       gatherResource: "wood",
+      gatherProgressSec: 0,
+      gatherIntervalSec: 1,
       craft: { recipeId: "smelt_dullflickBar" },
     },
     expedition: {

@@ -1,6 +1,7 @@
 import { SKILLS } from "./content.js"
 import { ITEMS, MINING_NODES, toolPerksForTier, maxDurabilityForItem } from "./items.js"
-import { canAfford, payCost } from "./math.js"
+import { FISHING_NODES, burnChanceFor } from "./fishing.js"
+import { canAfford, payCost, nextLevelProgress } from "./math.js"
 import { computeModifiers } from "./modifiers.js"
 import { pushLog } from "./log.js"
 import { RECIPES } from "./recipes.js"
@@ -41,6 +42,13 @@ function tickGather(state, dtSec) {
   const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
   const eff = injured ? 0.6 : 1
 
+  state.activity.gatherIntervalSec = state.activity.gatherIntervalSec ?? 1
+  state.activity.gatherProgressSec = state.activity.gatherProgressSec ?? 0
+  state.activity.gatherProgressSec += dtSec
+  if (state.activity.gatherProgressSec >= state.activity.gatherIntervalSec) {
+    state.activity.gatherProgressSec %= state.activity.gatherIntervalSec
+  }
+
   if (skillId === "mining") {
     const targetId = state.activity.gatherResource ?? MINING_NODES[0]?.id
     const node = MINING_NODES.find((entry) => entry.id === targetId)
@@ -64,6 +72,18 @@ function tickGather(state, dtSec) {
     addXp(state, skillId, xpPerSec * dtSec)
     const durabilityLoss = yieldPerSec * dtSec * (1 - perks.noDurabilityChance)
     applyDurabilityLoss(state, "pickaxe", durabilityLoss)
+    return
+  }
+
+  if (skillId === "fishing") {
+    const targetId = state.activity.gatherResource ?? FISHING_NODES[0]?.id
+    const node = FISHING_NODES.find((entry) => entry.id === targetId)
+    if (!node) return
+    let yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
+    const finalYield = yieldPerSec * dtSec
+    addResource(state, node.rawId, finalYield)
+    const xpPerSec = node.fishingXp * yieldPerSec * mods.gatherXpMult
+    addXp(state, skillId, xpPerSec * dtSec)
     return
   }
 
@@ -143,10 +163,22 @@ function tickCraft(state, dtSec) {
 
     craft.inProgress = false
 
-    for (const [rid, amt] of Object.entries(recipe.out ?? {})) {
-      addResource(state, rid, amt)
+    if (recipe.special === "cookFish") {
+      const cookingLevel = SKILLS.cooking ? state.skills.cooking?.xp ?? 0 : 0
+      const cookingSkillLevel = nextLevelProgress(cookingLevel).level
+      const burnChance = burnChanceFor({ cookingLevel: cookingSkillLevel, fishLevel: recipe.fishLevel ?? 1 })
+      const roll = Math.random() * 100
+      const burnt = roll < burnChance
+      const outId = burnt ? recipe.burntId : recipe.cookedId
+      if (outId) addResource(state, outId, 1)
+      const xpGain = (recipe.xp ?? 0) * (burnt ? 0.25 : 1)
+      addXp(state, recipe.skill, xpGain * mods.globalXpMult)
+    } else {
+      for (const [rid, amt] of Object.entries(recipe.out ?? {})) {
+        addResource(state, rid, amt)
+      }
+      addXp(state, recipe.skill, recipe.xp * mods.globalXpMult)
     }
-    addXp(state, recipe.skill, recipe.xp * mods.globalXpMult)
   }
 }
 

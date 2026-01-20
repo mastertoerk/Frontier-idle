@@ -1,5 +1,7 @@
-import { BUILDINGS, SKILLS } from "./content.js"
+import { BUILDINGS, RESOURCES, SKILLS } from "./content.js"
 import { ITEMS, MINING_NODES, maxDurabilityForItem } from "./items.js"
+import { FISHING_NODES } from "./fishing.js"
+import { sellPriceForEquipped, sellPriceForResource } from "./economy.js"
 import { scaleCost, canAfford, payCost, nextLevelProgress, levelFromXp } from "./math.js"
 import { pushLog } from "./log.js"
 import { RECIPES } from "./recipes.js"
@@ -24,12 +26,22 @@ export function startGather(state, skillId, resourceId = null) {
     if (skillLevel < node.level) return
     gatherResource = node.id
   }
+  if (skillId === "fishing") {
+    const targetId = resourceId ?? state.activity.gatherResource
+    const node = FISHING_NODES.find((entry) => entry.id === targetId) ?? FISHING_NODES[0]
+    if (!node) return
+    if (skillLevel < node.level) return
+    gatherResource = node.id
+  }
   state.activity.type = "gather"
   state.activity.gatherSkill = skillId
   state.activity.gatherResource = gatherResource
+  state.activity.gatherProgressSec = 0
+  state.activity.gatherIntervalSec = 1
   const targetLabel =
-    skillId === "mining" && gatherResource
-      ? ` (${MINING_NODES.find((entry) => entry.id === gatherResource)?.name ?? "Ore"})`
+    (skillId === "mining" || skillId === "fishing") && gatherResource
+      ? ` (${(MINING_NODES.find((entry) => entry.id === gatherResource)?.name ??
+          FISHING_NODES.find((entry) => entry.id === gatherResource)?.name) ?? "Target"})`
       : ""
   pushLog(state, `Gathering: ${(SKILLS[skillId]?.name ?? skillId)}${targetLabel}.`)
 }
@@ -116,6 +128,28 @@ export function repairItem(state, slot) {
   current.durability = maxDurabilityForItem(item.id)
   state.skills.smithing.xp += item.xp * 0.25
   pushLog(state, `Repaired ${item.name}.`)
+}
+
+export function sellResource(state, resourceId, amount = 1) {
+  if (!resourceId || amount <= 0) return
+  const owned = state.resources[resourceId] ?? 0
+  if (owned < amount) return
+  const price = sellPriceForResource(resourceId)
+  if (price <= 0) return
+  state.resources[resourceId] = owned - amount
+  state.resources.gold = (state.resources.gold ?? 0) + price * amount
+  const name = RESOURCES[resourceId]?.name ?? resourceId
+  pushLog(state, `Sold ${amount} ${name} for ${price * amount} gold.`)
+}
+
+export function sellEquippedItem(state, slot) {
+  const current = state.equipment[slot]
+  if (!current?.id) return
+  const price = sellPriceForEquipped(current.id, current.durability ?? 0)
+  if (price <= 0) return
+  state.resources.gold = (state.resources.gold ?? 0) + price
+  state.equipment[slot] = null
+  pushLog(state, `Sold equipped ${ITEMS[current.id]?.name ?? "item"} for ${price} gold.`)
 }
 
 function canPrestige(state) {

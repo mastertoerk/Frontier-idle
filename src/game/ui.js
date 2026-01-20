@@ -1,5 +1,6 @@
 import { BUILDINGS, RESOURCES, SKILLS } from "./content.js"
 import { EQUIPMENT_SLOTS, ITEMS, MINING_NODES, TIER_DATA, maxDurabilityForItem, toolPerksForTier } from "./items.js"
+import { COOKED_FISH, FISHING_NODES } from "./fishing.js"
 import { nextLevelProgress } from "./math.js"
 import { formatInt, formatNumber, formatSeconds } from "./format.js"
 import {
@@ -8,6 +9,8 @@ import {
   equipItem,
   foundNewSettlement,
   repairItem,
+  sellEquippedItem,
+  sellResource,
   setActivityIdle,
   setTab,
   startCraft,
@@ -19,6 +22,7 @@ import { chooseExpeditionOption, startExpedition, stopExpedition } from "./exped
 import { RECIPES } from "./recipes.js"
 import { computeModifiers } from "./modifiers.js"
 import { computePlayerCombat } from "./combat.js"
+import { sellPriceForEquipped, sellPriceForResource } from "./economy.js"
 
 function escapeHtml(s) {
   return String(s)
@@ -98,6 +102,8 @@ export function createUI({ root, store }) {
     const gatherTarget =
       state.activity.gatherSkill === "mining"
         ? MINING_NODES.find((node) => node.id === state.activity.gatherResource)?.name
+        : state.activity.gatherSkill === "fishing"
+          ? FISHING_NODES.find((node) => node.id === state.activity.gatherResource)?.name
         : null
     const activeLabel =
       activity === "idle"
@@ -112,6 +118,27 @@ export function createUI({ root, store }) {
               ? "On Expedition"
               : activity
 
+    const progress =
+      activity === "craft"
+        ? (() => {
+            const craft = state.activity.craft ?? {}
+            const recipe = RECIPES[craft.recipeId]
+            if (!recipe || !craft.inProgress) return 0
+            return 1 - Math.max(0, craft.remainingSec ?? 0) / Math.max(0.01, recipe.durationSec ?? 1)
+          })()
+        : activity === "gather"
+          ? (() => {
+              const interval = state.activity.gatherIntervalSec ?? 1
+              const elapsed = state.activity.gatherProgressSec ?? 0
+              return Math.min(1, Math.max(0, elapsed / Math.max(0.01, interval)))
+            })()
+          : 0
+
+    const progressUi =
+      progress > 0
+        ? `<div class="bar"><div class="bar__fill" style="width:${Math.floor(progress * 100)}%"></div></div>`
+        : ""
+
     return `
       <div class="card">
         <div class="card__title">Activity</div>
@@ -119,13 +146,14 @@ export function createUI({ root, store }) {
           <div class="pill">${escapeHtml(activeLabel)}${isInjured(state) ? ' <span class="bad">Injured</span>' : ""}</div>
           <button class="btn" data-action="activity-idle">Idle</button>
         </div>
+        ${progressUi}
       </div>
     `
   }
 
   function renderSkillSelector(state) {
     const selected = state.ui.selectedSkill ?? "woodcutting"
-    const skills = ["woodcutting", "mining", "smithing", "cooking", "alchemy"]
+    const skills = ["woodcutting", "mining", "fishing", "smithing", "cooking", "alchemy"]
     const rows = skills
       .map((sid) => {
         const active = selected === sid ? "btn btn--tier btn--tier-active" : "btn btn--tier"
@@ -165,6 +193,29 @@ export function createUI({ root, store }) {
     `
   }
 
+  function renderFishingTargets(state) {
+    const fishingLevel = nextLevelProgress(state.skills.fishing?.xp ?? 0).level
+    const unlocked = FISHING_NODES.filter((node) => node.level <= fishingLevel)
+    if (unlocked.length === 0) {
+      return `<div class="muted small">No fishing spots unlocked yet.</div>`
+    }
+    return `
+      <div class="card">
+        <div class="card__title">Fishing Targets</div>
+        <div class="row">
+          ${unlocked
+            .map(
+              (node) =>
+                `<button class="btn" data-action="activity-gather" data-skill="fishing" data-resource="${escapeHtml(
+                  node.id
+                )}">Fish ${escapeHtml(node.name)}</button>`
+            )
+            .join("")}
+        </div>
+      </div>
+    `
+  }
+
   function renderCraftingList(state, skillId) {
     const skillLevel = nextLevelProgress(state.skills[skillId]?.xp ?? 0).level
     const buildingId =
@@ -175,6 +226,7 @@ export function createUI({ root, store }) {
     const rows = recipes
       .map((recipe) => {
         const canUse = buildingLevel > 0 && skillLevel >= (recipe.requiresLevel ?? 1)
+        const actionLabel = skillId === "cooking" ? "Cook" : "Craft"
         return `
           <div class="recipeRow">
             <div>
@@ -185,7 +237,7 @@ export function createUI({ root, store }) {
             </div>
             <button class="btn" data-action="activity-craft" data-recipe="${escapeHtml(recipe.id)}" ${
               canUse ? "" : "disabled"
-            }>Craft</button>
+            }>${actionLabel}</button>
           </div>
         `
       })
@@ -290,11 +342,34 @@ export function createUI({ root, store }) {
       .join("")
 
     const selected = state.ui.selectedSkill ?? "woodcutting"
+    const activeSkillId =
+      state.activity.type === "gather"
+        ? state.activity.gatherSkill
+        : state.activity.type === "craft"
+          ? RECIPES[state.activity.craft?.recipeId]?.skill
+          : null
+    const activeSkill = activeSkillId ? SKILLS[activeSkillId] : null
+    const activeXp = activeSkillId ? state.skills[activeSkillId]?.xp ?? 0 : 0
+    const activeProgress = activeSkillId ? nextLevelProgress(activeXp) : null
+    const activeProgressUi =
+      activeSkill && activeProgress
+        ? `
+          <div class="card">
+            <div class="card__title">Training: ${escapeHtml(activeSkill.name)}</div>
+            <div class="bar"><div class="bar__fill" style="width:${Math.floor(activeProgress.pct * 100)}%"></div></div>
+            <div class="muted small">${formatInt(Math.floor(activeProgress.xpIntoLevel))} / ${formatInt(
+              activeProgress.xpForNext
+            )} XP</div>
+          </div>
+        `
+        : ""
     let skillPanel = ""
     if (selected === "woodcutting") {
       skillPanel = `<div class="card"><div class="card__title">Woodcutting</div><div class="muted small">Selecting Woodcutting starts gathering wood.</div></div>`
     } else if (selected === "mining") {
       skillPanel = renderMiningTargets(state)
+    } else if (selected === "fishing") {
+      skillPanel = renderFishingTargets(state)
     } else if (selected === "smithing") {
       skillPanel = renderSmithing(state)
     } else if (selected === "cooking") {
@@ -303,13 +378,13 @@ export function createUI({ root, store }) {
       skillPanel = renderCraftingList(state, "alchemy")
     }
 
-    return `<div class="stack">${renderActivitySummary(state)}${renderSkillSelector(state)}${skillPanel}${skills}</div>`
+    return `<div class="stack">${renderActivitySummary(state)}${renderSkillSelector(state)}${activeProgressUi}${skillPanel}${skills}</div>`
   }
 
 	  function renderExpedition(state) {
 	    const e = state.expedition
 	    if (!e.active) {
-      const canStart = (state.resources.rations ?? 0) > 0 || (state.resources.meat ?? 0) > 0
+      const canStart = COOKED_FISH.some((fish) => (state.resources[fish.id] ?? 0) > 0)
       return `
         <div class="stack">
           ${renderActivitySummary(state)}
@@ -321,7 +396,7 @@ export function createUI({ root, store }) {
               <button class="btn" data-action="expedition-start" data-risk="2" ${canStart ? "" : "disabled"}>Start (Risk 2)</button>
               <button class="btn" data-action="expedition-start" data-risk="3" ${canStart ? "" : "disabled"}>Start (Risk 3)</button>
             </div>
-            <div class="muted small">Tip: cook rations for safer runs.</div>
+            <div class="muted small">Tip: cook fish for safer runs.</div>
           </div>
         </div>
       `
@@ -416,8 +491,9 @@ export function createUI({ root, store }) {
 	        <div class="card">
 	          <div class="card__title">Supplies</div>
 	          <div class="row">
-	            <div class="pill">Meat: ${formatInt(state.resources.meat ?? 0)}</div>
-	            <div class="pill">Rations: ${formatInt(state.resources.rations ?? 0)}</div>
+	            <div class="pill">Cooked Fish: ${formatInt(
+                COOKED_FISH.reduce((sum, fish) => sum + (state.resources[fish.id] ?? 0), 0)
+              )}</div>
 	            <div class="pill">Potions: ${formatInt(state.resources.potions ?? 0)}</div>
 	          </div>
           <div class="muted small">Gear: Weapon T${formatNumber(playerCombat.weaponTier ?? 0, 1)} | Armor T${formatNumber(
@@ -533,6 +609,9 @@ export function createUI({ root, store }) {
   function renderInventory(state) {
     const oreIds = resourceIdsByCategory("ore")
     const barIds = resourceIdsByCategory("bar")
+    const rawFishIds = resourceIdsByCategory("fishRaw")
+    const cookedFishIds = resourceIdsByCategory("fishCooked")
+    const burntFishIds = resourceIdsByCategory("fishBurnt")
     const materialIds = [...oreIds, ...barIds]
     const supplyIds = [
       ...resourceIdsByCategory("material"),
@@ -549,7 +628,19 @@ export function createUI({ root, store }) {
       .map((rid) => {
         const r = RESOURCES[rid]
         const v = state.resources[rid] ?? 0
-        return `<div class="invItem"><div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div><div class="invItem__val">${formatInt(v)}</div></div>`
+        const price = sellPriceForResource(rid)
+        return `
+          <div class="invItem invItem--trade">
+            <div>
+              <div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div>
+              <div class="invItem__val">${formatInt(v)}</div>
+            </div>
+            <button class="btn btn--tiny" data-action="sell-resource" data-resource="${escapeHtml(rid)}">Sell 1 (${formatNumber(
+              price,
+              2
+            )}g)</button>
+          </div>
+        `
       })
       .join("")
 
@@ -559,7 +650,35 @@ export function createUI({ root, store }) {
         const r = RESOURCES[rid]
         const v = state.resources[rid] ?? 0
         const c = rid === "gold" ? "res res--gold" : "res"
-        return `<div class="${c}"><div class="res__name">${escapeHtml(r?.name ?? rid)}</div><div class="res__val">${formatInt(v)}</div></div>`
+        const val = rid === "gold" ? formatNumber(v, 2) : formatInt(v)
+        return `<div class="${c}"><div class="res__name">${escapeHtml(r?.name ?? rid)}</div><div class="res__val">${val}</div></div>`
+      })
+      .join("")
+
+    const rawFishRows = rawFishIds
+      .filter((rid) => (state.resources[rid] ?? 0) > 0)
+      .map((rid) => {
+        const r = RESOURCES[rid]
+        const v = state.resources[rid] ?? 0
+        return `<div class="invItem"><div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div><div class="invItem__val">${formatInt(v)}</div></div>`
+      })
+      .join("")
+
+    const cookedFishRows = COOKED_FISH.filter((fish) => (state.resources[fish.id] ?? 0) > 0)
+      .map((fish) => {
+        const v = state.resources[fish.id] ?? 0
+        return `<div class="invItem"><div class="invItem__name">${escapeHtml(
+          fish.name
+        )}</div><div class="invItem__val">${formatInt(v)} <span class="muted">(+${fish.heal} HP)</span></div></div>`
+      })
+      .join("")
+
+    const burntFishRows = burntFishIds
+      .filter((rid) => (state.resources[rid] ?? 0) > 0)
+      .map((rid) => {
+        const r = RESOURCES[rid]
+        const v = state.resources[rid] ?? 0
+        return `<div class="invItem"><div class="invItem__name">${escapeHtml(r?.name ?? rid)}</div><div class="invItem__val">${formatInt(v)}</div></div>`
       })
       .join("")
 
@@ -569,15 +688,22 @@ export function createUI({ root, store }) {
         const v = state.resources[rid] ?? 0
         const equippedId = item?.slot ? state.equipment[item.slot]?.id : null
         const alreadyEquipped = equippedId === rid
+        const price = sellPriceForResource(rid)
         return `
           <div class="invItem invItem--gear">
             <div>
               <div class="invItem__name">${escapeHtml(item?.name ?? rid)}</div>
               <div class="muted small">Tier ${item?.tier ?? "?"} | ${formatInt(v)} owned</div>
             </div>
-            <button class="btn btn--small" data-action="equip-item" data-item="${escapeHtml(rid)}" ${
-              alreadyEquipped ? "disabled" : ""
-            }>${alreadyEquipped ? "Equipped" : "Equip"}</button>
+            <div class="invItem__actions">
+              <button class="btn btn--small" data-action="equip-item" data-item="${escapeHtml(rid)}" ${
+                alreadyEquipped ? "disabled" : ""
+              }>${alreadyEquipped ? "Equipped" : "Equip"}</button>
+              <button class="btn btn--tiny" data-action="sell-resource" data-resource="${escapeHtml(rid)}">Sell 1 (${formatNumber(
+                price,
+                2
+              )}g)</button>
+            </div>
           </div>
         `
       })
@@ -592,12 +718,22 @@ export function createUI({ root, store }) {
       const maxDurability = entry?.id ? maxDurabilityForItem(entry.id) : 0
       const needsRepair = entry?.id && (entry.durability ?? maxDurability) < maxDurability
       const repairBar = entry?.id ? RESOURCES[ITEMS[entry.id]?.barId ?? ""]?.name : null
+      const sellPrice = entry?.id ? sellPriceForEquipped(entry.id, entry.durability ?? 0) : 0
+      const canSell = entry?.id && sellPrice > 0
       return `
         <div class="equipSlot ${entry?.id ? "" : "equipSlot--empty"}">
           <div class="equipSlot__label">${escapeHtml(SLOT_LABELS[slot] ?? slot)}</div>
           <div class="equipSlot__name">${escapeHtml(equippedLabel(slot, entry))}</div>
           <div class="equipSlot__actions">
             ${entry?.id ? `<button class="btn btn--tiny" data-action="unequip-item" data-slot="${slot}">Unequip</button>` : ""}
+            ${
+              canSell
+                ? `<button class="btn btn--tiny" data-action="sell-equipped" data-slot="${slot}">Sell (${formatNumber(
+                    sellPrice,
+                    2
+                  )}g)</button>`
+                : ""
+            }
             ${
               needsRepair
                 ? `<button class="btn btn--tiny" data-action="repair-item" data-slot="${slot}" ${
@@ -620,6 +756,18 @@ export function createUI({ root, store }) {
         <div class="card">
           <div class="card__title">Materials</div>
           ${materialRows ? `<div class="invGrid">${materialRows}</div>` : `<div class="muted small">No materials yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Raw Fish</div>
+          ${rawFishRows ? `<div class="invGrid">${rawFishRows}</div>` : `<div class="muted small">No raw fish yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Cooked Fish</div>
+          ${cookedFishRows ? `<div class="invGrid">${cookedFishRows}</div>` : `<div class="muted small">No cooked fish yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Burnt Fish</div>
+          ${burntFishRows ? `<div class="invGrid">${burntFishRows}</div>` : `<div class="muted small">No burnt fish yet.</div>`}
         </div>
         <div class="card">
           <div class="card__title">Supplies</div>
@@ -744,17 +892,6 @@ export function createUI({ root, store }) {
       const skillId = target.getAttribute("data-skill")
       store.update((s) => {
         s.ui.selectedSkill = skillId
-        if (skillId === "woodcutting") {
-          startGather(s, "woodcutting")
-          return
-        }
-        if (skillId === "mining") {
-          const miningLevel = nextLevelProgress(s.skills.mining?.xp ?? 0).level
-          const unlocked = MINING_NODES.filter((node) => node.level <= miningLevel)
-          const nextTarget =
-            unlocked.find((node) => node.id === s.activity.gatherResource)?.id ?? unlocked[0]?.id
-          if (nextTarget) startGather(s, "mining", nextTarget)
-        }
       })
       return
     }
@@ -845,6 +982,18 @@ export function createUI({ root, store }) {
       return
     }
 
+    if (action === "sell-resource") {
+      const resourceId = target.getAttribute("data-resource")
+      store.update((s) => sellResource(s, resourceId, 1))
+      return
+    }
+
+    if (action === "sell-equipped") {
+      const slot = target.getAttribute("data-slot")
+      store.update((s) => sellEquippedItem(s, slot))
+      return
+    }
+
     if (action === "smithing-tier") {
       const tier = Number(target.getAttribute("data-tier") || 1)
       store.update((s) => {
@@ -892,11 +1041,17 @@ export function createUI({ root, store }) {
     }
   }
 
+  function onTouchEnd(e) {
+    const target = e.target?.closest?.("[data-action]")
+    handleAction(target)
+  }
+
   root.addEventListener("click", onClick)
   root.addEventListener("pointerup", onPointerUp)
   root.addEventListener("scroll", onScroll, { passive: true })
   root.addEventListener("touchstart", onTouchStart, { passive: true })
   root.addEventListener("touchmove", onTouchMove, { passive: true })
+  root.addEventListener("touchend", onTouchEnd, { passive: true })
   root.addEventListener("pointerdown", onPointerDown, { passive: true })
   root.addEventListener("pointermove", onPointerMove, { passive: true })
   root.addEventListener("wheel", onWheel, { passive: true })
@@ -910,6 +1065,7 @@ export function createUI({ root, store }) {
       root.removeEventListener("scroll", onScroll)
       root.removeEventListener("touchstart", onTouchStart)
       root.removeEventListener("touchmove", onTouchMove)
+      root.removeEventListener("touchend", onTouchEnd)
       root.removeEventListener("pointerdown", onPointerDown)
       root.removeEventListener("pointermove", onPointerMove)
       root.removeEventListener("wheel", onWheel)
