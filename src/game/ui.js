@@ -1295,9 +1295,12 @@ export function createUI({ root, store }) {
   }
 
   function onPointerUp(e) {
-    if (e?.pointerType !== "mouse" || e.button !== 0) return
-    suppressClickUntil = performance.now() + 400
-    const target = e.target?.closest?.("[data-action]")
+    if (e.button !== 0) return
+    const raw = e.target
+    const isRange = raw?.tagName === "INPUT" && raw?.type === "range"
+    if (isRange || raw?.closest?.('[data-action="sell-qty"]')) return
+    suppressClickUntil = performance.now() + 500
+    const target = raw?.closest?.("[data-action]")
     handleAction(target)
   }
 
@@ -1326,22 +1329,12 @@ export function createUI({ root, store }) {
     }
   }
 
-  function onTouchEnd(e) {
-    const raw = e.target
-    const isRange = raw?.tagName === "INPUT" && raw?.type === "range"
-    if (isRange || raw?.closest?.('[data-action="sell-qty"]')) return
-    suppressClickUntil = performance.now() + 500
-    const target = raw?.closest?.("[data-action]")
-    handleAction(target)
-  }
-
   root.addEventListener("click", onClick)
   root.addEventListener("input", onInput)
   root.addEventListener("pointerup", onPointerUp)
   root.addEventListener("scroll", onScroll, { passive: true })
   root.addEventListener("touchstart", onTouchStart, { passive: true })
   root.addEventListener("touchmove", onTouchMove, { passive: true })
-  root.addEventListener("touchend", onTouchEnd, { passive: true })
   root.addEventListener("pointerdown", onPointerDown, { passive: true })
   root.addEventListener("pointermove", onPointerMove, { passive: true })
   root.addEventListener("wheel", onWheel, { passive: true })
@@ -1356,7 +1349,6 @@ export function createUI({ root, store }) {
       root.removeEventListener("scroll", onScroll)
       root.removeEventListener("touchstart", onTouchStart)
       root.removeEventListener("touchmove", onTouchMove)
-      root.removeEventListener("touchend", onTouchEnd)
       root.removeEventListener("pointerdown", onPointerDown)
       root.removeEventListener("pointermove", onPointerMove)
       root.removeEventListener("wheel", onWheel)
