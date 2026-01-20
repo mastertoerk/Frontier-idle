@@ -227,6 +227,7 @@ body
 
 .sellSlider {
     width: 100%;
+    touch-action: pan-x;
 }
 
 .sellPanel__meta {

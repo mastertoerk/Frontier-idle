@@ -4,7 +4,8 @@ export function clamp(min, value, max) {
 
 export function xpForLevel(level) {
   // Smooth but not explosive: ~5k xp to reach lvl 10, ~100k to reach lvl 50
-  return Math.floor(40 * level * level + 60 * level)
+  const n = Math.max(0, level - 1)
+  return Math.floor(40 * n * n + 60 * n)
 }
 
 export function levelFromXp(xp, maxLevel = 99) {
@@ -49,4 +50,3 @@ export function payCost(resources, cost) {
     resources[k] = (resources[k] ?? 0) - v
   }
 }
-

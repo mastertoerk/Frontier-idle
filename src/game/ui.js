@@ -1327,7 +1327,11 @@ export function createUI({ root, store }) {
   }
 
   function onTouchEnd(e) {
-    const target = e.target?.closest?.("[data-action]")
+    const raw = e.target
+    const isRange = raw?.tagName === "INPUT" && raw?.type === "range"
+    if (isRange || raw?.closest?.('[data-action="sell-qty"]')) return
+    suppressClickUntil = performance.now() + 500
+    const target = raw?.closest?.("[data-action]")
     handleAction(target)
   }
 
