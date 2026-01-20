@@ -1,0 +1,3312 @@
+2026-01-18T18:14:58.136509Z  INFO Selected model: gpt-5.2, Selected effort: high
+2026-01-18T18:16:09.099113Z  INFO spawning ghost snapshot task
+2026-01-18T18:16:09.116334Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:16:09.116407Z  INFO ghost commit captured: 2de332c015d88ce7d54c4391e9a9c1dc7424b427
+2026-01-18T18:16:09.116423Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:16:09.648050Z  WARN failed to paste image: clipboard unavailable: Unknown error while interacting with the clipboard: X11 server connection timed out because it was unreachable
+2026-01-18T18:16:47.928567Z  WARN failed to paste image: clipboard unavailable: Unknown error while interacting with the clipboard: X11 server connection timed out because it was unreachable
+2026-01-18T18:18:14.509193Z  INFO spawning ghost snapshot task
+2026-01-18T18:18:14.536475Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:18:14.536521Z  INFO ghost commit captured: 1461601eaf458d0e1ba9ac6a67dd6d4b0361cda5
+2026-01-18T18:18:14.536536Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:18:19.204576Z  INFO ToolCall: shell_command {"command":"ls -ლა","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:24.073109Z  INFO ToolCall: shell_command {"command":"ls -la","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:28.256420Z  INFO ToolCall: shell_command {"command":"ls -la public && ls -la shaders","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:31.778001Z  INFO ToolCall: shell_command {"command":"ls -lat | head -n 30","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:35.911894Z  INFO ToolCall: shell_command {"command":"cat STACK.md && echo '---' && cat README.md","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:40.808773Z  INFO ToolCall: shell_command {"command":"cat package.json","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:45.523237Z  INFO ToolCall: shell_command {"command":"find . -maxdepth 3 -type f | sed 's|^./||' | sort","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:18:53.810389Z  INFO ToolCall: shell_command {"command":"sed -n '1,200p' main.js","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:19:15.791283Z  INFO spawning ghost snapshot task
+2026-01-18T18:19:15.818725Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:19:15.818781Z  INFO ghost commit captured: 206bb1a35ad670b115aa5d3f324575113626aa3b
+2026-01-18T18:19:15.818797Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:19:21.592132Z  INFO ToolCall: shell_command {"command":"python3 - <<'PY'\nimport pathlib\np = pathlib.Path('/tmp/upload-3567799574/game idea.txt')\nprint(p.exists(), p)\nprint(p.read_text('utf-8', errors='replace'))\nPY","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:19:42.877877Z  INFO ToolCall: shell_command {"command":"cat index.html && echo '---' && cat style.css","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:20:16.771570Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"in_progress"},{"step":"Design state and content data", "status":"pending"},{"step":"Implement simulation and persistence", "status":"pending"},{"step":"Build UI screens and controls", "status":"pending"},{"step":"Integrate with Three.js background", "status":"pending"},{"step":"Sanity-check in-node utilities", "status":"pending"}],"explanation":"Implement a playable MVP of the idle RPG (skills + town + expeditions + prestige) inside the existing Vite/Three project, without running the dev server."}
+2026-01-18T18:20:20.321390Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"completed"},{"step":"Design state and content data", "status":"in_progress"},{"step":"Implement simulation and persistence", "status":"pending"},{"step":"Build UI screens and controls", "status":"pending"},{"step":"Integrate with Three.js background", "status":"pending"},{"step":"Sanity-check in-node utilities", "status":"pending"}]}
+2026-01-18T18:21:06.504316Z  INFO ToolCall: shell_command {"command":"find public/models -maxdepth 4 -type f | head","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:23:57.181881Z  INFO interrupt received: abort current task, if any
+2026-01-18T18:24:18.123223Z  INFO spawning ghost snapshot task
+2026-01-18T18:24:18.142360Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:24:18.142391Z  INFO ghost commit captured: 6ec57bd46aeeebb9d3db25d635f8f79884714fbc
+2026-01-18T18:24:18.142401Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:25:12.755280Z  INFO ToolCall: shell_command {"command":"cat vite.config.js","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:25:32.826491Z  INFO interrupt received: abort current task, if any
+2026-01-18T18:25:49.378352Z  INFO spawning ghost snapshot task
+2026-01-18T18:25:49.409733Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:25:49.409785Z  INFO ghost commit captured: bd7a61e755d94d7c3f117b1e3df620d9dc386a42
+2026-01-18T18:25:49.409795Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:26:48.726457Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Add File: src/game/content.js
++export const SKILLS = /** @type {const} */ ({
++  woodcutting: {
++    id: "woodcutting",
++    name: "Woodcutting",
++    baseXpPerSecond: 3,
++    baseYieldPerSecond: 1,
++    yields: { wood: 1 },
++  },
++  mining: {
++    id: "mining",
++    name: "Mining",
++    baseXpPerSecond: 3,
++    baseYieldPerSecond: 0.8,
++    yields: { ore: 1 },
++  },
++  smithing: {
++    id: "smithing",
++    name: "Smithing",
++  },
++  cooking: {
++    id: "cooking",
++    name: "Cooking",
++  },
++  alchemy: {
++    id: "alchemy",
++    name: "Alchemy",
++  },
++  combat: {
++    id: "combat",
++    name: "Combat",
++  },
++})
++
++export const RESOURCES = /** @type {const} */ ({
++  wood: { id: "wood", name: "Wood" },
++  ore: { id: "ore", name: "Ore" },
++  bars: { id: "bars", name: "Bars" },
++  herbs: { id: "herbs", name: "Herbs" },
++  potions: { id: "potions", name: "Potions" },
++  meat: { id: "meat", name: "Raw Meat" },
++  rations: { id: "rations", name: "Rations" },
++  gold: { id: "gold", name: "Gold" },
++})
++
++export const BUILDINGS = /** @type {const} */ ({
++  campfire: {
++    id: "campfire",
++    name: "Campfire",
++    desc: "Improves cooking and recovery.",
++    baseCost: { wood: 30, meat: 10 },
++    costScale: 1.5,
++  },
++  workshop: {
++    id: "workshop",
++    name: "Workshop",
++    desc: "Improves gathering efficiency.",
++    baseCost: { wood: 60, ore: 20 },
++    costScale: 1.6,
++  },
++  forge: {
++    id: "forge",
++    name: "Forge",
++    desc: "Unlocks smelting and simple gear.",
++    baseCost: { wood: 40, ore: 60 },
++    costScale: 1.7,
++  },
++  alchemistHut: {
++    id: "alchemistHut",
++    name: "Alchemist Hut",
++    desc: "Unlocks potions and improves expeditions.",
++    baseCost: { wood: 50, herbs: 25 },
++    costScale: 1.7,
++  },
++  barracks: {
++    id: "barracks",
++    name: "Barracks",
++    desc: "Improves combat power.",
++    baseCost: { wood: 80, bars: 20 },
++    costScale: 1.8,
++  },
++  storehouse: {
++    id: "storehouse",
++    name: "Storehouse",
++    desc: "Increases storage capacity.",
++    baseCost: { wood: 120, ore: 30 },
++    costScale: 1.65,
++  },
++  scoutLodge: {
++    id: "scoutLodge",
++    name: "Scout Lodge",
++    desc: "More loot, fewer nasty surprises.",
++    baseCost: { wood: 90, herbs: 15, gold: 50 },
++    costScale: 1.75,
++  },
++  townHall: {
++    id: "townHall",
++    name: "Town Hall",
++    desc: "Unlocks founding a new settlement (prestige).",
++    baseCost: { wood: 200, bars: 50, gold: 200 },
++    costScale: 2.0,
++  },
++})
++
++export function listSkillIds() {
++  return /** @type {Array<keyof typeof SKILLS>} */ (Object.keys(SKILLS))
++}
++
++export function listBuildingIds() {
++  return /** @type {Array<keyof typeof BUILDINGS>} */ (Object.keys(BUILDINGS))
++}
++
++export function listResourceIds() {
++  return /** @type {Array<keyof typeof RESOURCES>} */ (Object.keys(RESOURCES))
++}
++
+*** Add File: src/game/math.js
++export function clamp(min, value, max) {
++  return Math.max(min, Math.min(max, value))
++}
++
++export function xpForLevel(level) {
++  // Smooth but not explosive: ~5k xp to reach lvl 10, ~100k to reach lvl 50
++  return Math.floor(40 * level * level + 60 * level)
++}
++
++export function levelFromXp(xp, maxLevel = 99) {
++  let level = 1
++  for (let next = 2; next <= maxLevel; next++) {
++    if (xp < xpForLevel(next)) return level
++    level = next
++  }
++  return maxLevel
++}
++
++export function nextLevelProgress(xp, maxLevel = 99) {
++  const level = levelFromXp(xp, maxLevel)
++  if (level >= maxLevel) {
++    return { level, xpIntoLevel: 0, xpForNext: 0, pct: 1 }
++  }
++  const xpThis = xpForLevel(level)
++  const xpNext = xpForLevel(level + 1)
++  const xpIntoLevel = Math.max(0, xp - xpThis)
++  const xpForNext = xpNext - xpThis
++  const pct = xpForNext > 0 ? xpIntoLevel / xpForNext : 0
++  return { level, xpIntoLevel, xpForNext, pct }
++}
++
++export function scaleCost(base, scale, level) {
++  const out = {}
++  for (const [k, v] of Object.entries(base)) {
++    out[k] = Math.ceil(v * Math.pow(scale, Math.max(0, level - 1)))
++  }
++  return out
++}
++
++export function canAfford(resources, cost) {
++  for (const [k, v] of Object.entries(cost)) {
++    if ((resources[k] ?? 0) < v) return false
++  }
++  return true
++}
++
++export function payCost(resources, cost) {
++  for (const [k, v] of Object.entries(cost)) {
++    resources[k] = (resources[k] ?? 0) - v
++  }
++}
++
+*** Add File: src/game/rng.js
++// Deterministic RNG (mulberry32) so expeditions are replayable from a seed.
++export function mulberry32(seed) {
++  let t = seed >>> 0
++  return function rand() {
++    t += 0x6d2b79f5
++    let x = Math.imul(t ^ (t >>> 15), 1 | t)
++    x ^= x + Math.imul(x ^ (x >>> 7), 61 | x)
++    return ((x ^ (x >>> 14)) >>> 0) / 4294967296
++  }
++}
++
++export function randomInt(rand, minInclusive, maxExclusive) {
++  return Math.floor(rand() * (maxExclusive - minInclusive)) + minInclusive
++}
++
+*** Add File: src/game/state.js
++import { listBuildingIds, listResourceIds, listSkillIds } from "./content.js"
++
++export const SAVE_VERSION = 1
++
++export function createDefaultState(now = Date.now()) {
++  const skills = {}
++  for (const id of listSkillIds()) {
++    skills[id] = { xp: 0 }
++  }
++
++  const resources = {}
++  for (const id of listResourceIds()) {
++    resources[id] = 0
++  }
++
++  const buildings = {}
++  for (const id of listBuildingIds()) {
++    buildings[id] = { level: 0 }
++  }
++
++  // Some starting scraps so you can click around immediately.
++  resources.wood = 20
++  resources.ore = 10
++  resources.meat = 5
++  resources.herbs = 5
++
++  return {
++    version: SAVE_VERSION,
++    meta: {
++      createdAt: now,
++      updatedAt: now,
++      lastTickAt: now,
++    },
++    ui: {
++      tab: "town", // town | skills | expedition | prestige | settings
++      log: [],
++    },
++    legacy: {
++      points: 0,
++      bonuses: {
++        globalXpMult: 1,
++        globalYieldMult: 1,
++      },
++    },
++    skills,
++    resources,
++    buildings,
++    equipment: {
++      weaponTier: 0,
++      armorTier: 0,
++    },
++    activity: {
++      type: "idle", // idle | gather | craft | expedition
++      gatherSkill: "woodcutting",
++      craft: { recipeId: "smeltBars" },
++    },
++    expedition: {
++      active: false,
++      seed: 0,
++      risk: 1, // 1..3
++      roomIndex: 0,
++      roomCount: 0,
++      room: null,
++      pendingChoice: null, // { kind, options: [...] }
++      stats: {
++        roomsCleared: 0,
++        bossesDefeated: 0,
++      },
++    },
++  }
++}
++
+*** Add File: src/game/store.js
++import { SAVE_VERSION, createDefaultState } from "./state.js"
++
++function safeJsonParse(text) {
++  try {
++    return JSON.parse(text)
++  } catch {
++    return null
++  }
++}
++
++function migrateSave(raw) {
++  if (!raw || typeof raw !== "object") return null
++  if (raw.version === SAVE_VERSION) return raw
++  return null
++}
++
++export function createStore({ storageKey }) {
++  /** @type {ReturnType<typeof createDefaultState>} */
++  let state = createDefaultState()
++  const listeners = new Set()
++  let dirty = false
++
++  function notify() {
++    for (const l of listeners) l(state)
++  }
++
++  function getState() {
++    return state
++  }
++
++  function update(mutator) {
++    mutator(state)
++    state.meta.updatedAt = Date.now()
++    dirty = true
++    notify()
++  }
++
++  function subscribe(listener) {
++    listeners.add(listener)
++    return () => listeners.delete(listener)
++  }
++
++  function load() {
++    const rawText = localStorage.getItem(storageKey)
++    if (!rawText) return
++    const raw = safeJsonParse(rawText)
++    const migrated = migrateSave(raw)
++    if (!migrated) return
++    state = migrated
++    dirty = false
++    notify()
++  }
++
++  function save() {
++    if (!dirty) return
++    localStorage.setItem(storageKey, JSON.stringify(state))
++    dirty = false
++  }
++
++  function hardReset() {
++    state = createDefaultState()
++    dirty = true
++    save()
++    notify()
++  }
++
++  return { getState, update, subscribe, load, save, hardReset }
++}
++
+*** End Patch
+2026-01-18T18:26:52.223157Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"completed"},{"step":"Design state and content data", "status":"completed"},{"step":"Implement simulation and persistence", "status":"in_progress"},{"step":"Build UI screens and controls", "status":"pending"},{"step":"Integrate with Three.js background", "status":"pending"},{"step":"Sanity-check in-node utilities", "status":"pending"}]}
+2026-01-18T18:28:07.199062Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Add File: src/game/format.js
++export function formatInt(n) {
++  const x = Math.floor(Number(n) || 0)
++  return x.toLocaleString()
++}
++
++export function formatNumber(n, digits = 2) {
++  const x = Number(n) || 0
++  return x.toLocaleString(undefined, { maximumFractionDigits: digits })
++}
++
++export function formatSeconds(sec) {
++  const s = Math.max(0, Math.floor(sec))
++  const h = Math.floor(s / 3600)
++  const m = Math.floor((s % 3600) / 60)
++  const r = s % 60
++  if (h > 0) return `${h}h ${m}m`
++  if (m > 0) return `${m}m ${r}s`
++  return `${r}s`
++}
++
+*** Add File: src/game/log.js
++export function pushLog(state, message) {
++  const ts = new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
++  state.ui.log.unshift(`[${ts}] ${message}`)
++  state.ui.log.length = Math.min(state.ui.log.length, 80)
++}
++
+*** Add File: src/game/recipes.js
++export const RECIPES = /** @type {const} */ ({
++  smeltBars: {
++    id: "smeltBars",
++    name: "Smelt Bars",
++    skill: "smithing",
++    durationSec: 2.5,
++    in: { ore: 3 },
++    out: { bars: 1 },
++    xp: 8,
++    requiresBuilding: "forge",
++  },
++  cookRations: {
++    id: "cookRations",
++    name: "Cook Rations",
++    skill: "cooking",
++    durationSec: 2.0,
++    in: { meat: 2 },
++    out: { rations: 1 },
++    xp: 7,
++    requiresBuilding: "campfire",
++  },
++  brewPotions: {
++    id: "brewPotions",
++    name: "Brew Potions",
++    skill: "alchemy",
++    durationSec: 3.5,
++    in: { herbs: 3 },
++    out: { potions: 1 },
++    xp: 10,
++    requiresBuilding: "alchemistHut",
++  },
++  craftWeapon: {
++    id: "craftWeapon",
++    name: "Craft Weapon (Tier +1)",
++    skill: "smithing",
++    durationSec: 6.0,
++    in: { bars: 12, wood: 10 },
++    out: {},
++    xp: 35,
++    requiresBuilding: "forge",
++    special: "weapon",
++  },
++  craftArmor: {
++    id: "craftArmor",
++    name: "Craft Armor (Tier +1)",
++    skill: "smithing",
++    durationSec: 7.0,
++    in: { bars: 16 },
++    out: {},
++    xp: 40,
++    requiresBuilding: "forge",
++    special: "armor",
++  },
++})
++
++export function listRecipeIds() {
++  return /** @type {Array<keyof typeof RECIPES>} */ (Object.keys(RECIPES))
++}
++
+*** Add File: src/game/modifiers.js
++export function computeModifiers(state) {
++  const b = state.buildings
++
++  const globalXpMult =
++    (state.legacy?.bonuses?.globalXpMult ?? 1) * (1 + 0.02 * (b.townHall?.level ?? 0))
++
++  const globalYieldMult = state.legacy?.bonuses?.globalYieldMult ?? 1
++
++  const gatherYieldMult = globalYieldMult * (1 + 0.07 * (b.workshop?.level ?? 0))
++  const gatherXpMult = globalXpMult
++
++  const smithingSpeedMult = 1 + 0.08 * (b.forge?.level ?? 0)
++  const cookingSpeedMult = 1 + 0.1 * (b.campfire?.level ?? 0)
++  const alchemySpeedMult = 1 + 0.08 * (b.alchemistHut?.level ?? 0)
++
++  const combatPowerMult = 1 + 0.07 * (b.barracks?.level ?? 0)
++  const lootMult = 1 + 0.05 * (b.scoutLodge?.level ?? 0) + 0.03 * (b.alchemistHut?.level ?? 0)
++  const injuryChanceMult = 1 - Math.min(0.35, 0.04 * (b.scoutLodge?.level ?? 0))
++
++  const storageCap = 200 + 150 * (b.storehouse?.level ?? 0)
++
++  return {
++    globalXpMult,
++    gatherYieldMult,
++    gatherXpMult,
++    smithingSpeedMult,
++    cookingSpeedMult,
++    alchemySpeedMult,
++    combatPowerMult,
++    lootMult,
++    injuryChanceMult,
++    storageCap,
++  }
++}
++
+*** Add File: src/game/expedition.js
++import { mulberry32, randomInt } from "./rng.js"
++import { computeModifiers } from "./modifiers.js"
++import { nextLevelProgress } from "./math.js"
++import { pushLog } from "./log.js"
++
++function rollRoomType(rand, roomIndex, roomCount) {
++  if (roomIndex === roomCount - 1) return "boss"
++  const r = rand()
++  if (r < 0.55) return "combat"
++  if (r < 0.7) return "event"
++  if (r < 0.85) return "rest"
++  return "treasure"
++}
++
++function makeRoom(state) {
++  const e = state.expedition
++  const rand = mulberry32(e.seed + e.roomIndex * 1337)
++  const type = rollRoomType(rand, e.roomIndex, e.roomCount)
++  const risk = e.risk
++  const baseDifficulty = 1 + Math.floor((e.roomIndex / Math.max(1, e.roomCount - 1)) * (2 + risk))
++  const difficulty = baseDifficulty + randomInt(rand, 0, 2)
++
++  const choiceMod = e._nextRoomMod ?? { lootMult: 1, difficultyAdd: 0 }
++  e._nextRoomMod = null
++
++  const finalDifficulty = Math.max(1, difficulty + (choiceMod.difficultyAdd ?? 0))
++
++  const durationSec = type === "rest" ? 6 : type === "treasure" ? 3 : type === "event" ? 0 : 8 + 3 * finalDifficulty
++
++  return {
++    type,
++    difficulty: finalDifficulty,
++    durationSec,
++    progressSec: 0,
++    lootMult: choiceMod.lootMult ?? 1,
++    resolved: false,
++  }
++}
++
++function computePlayerCombat(state) {
++  const mods = computeModifiers(state)
++  const combatLevel = nextLevelProgress(state.skills.combat.xp).level
++  const weapon = state.equipment.weaponTier ?? 0
++  const armor = state.equipment.armorTier ?? 0
++  const power = (1 + combatLevel * 0.18 + weapon * 0.45) * mods.combatPowerMult
++  const toughness = 1 + combatLevel * 0.12 + armor * 0.5
++  return { power, toughness, combatLevel }
++}
++
++function awardLoot(state, { difficulty, isBoss, lootMult }) {
++  const mods = computeModifiers(state)
++  const totalLootMult = mods.lootMult * lootMult
++  const gold = Math.ceil((6 + 5 * difficulty + (isBoss ? 20 : 0)) * totalLootMult)
++  const meat = Math.random() < 0.65 ? Math.ceil((1 + difficulty * 0.6) * totalLootMult) : 0
++  const herbs = Math.random() < 0.4 ? Math.ceil((1 + difficulty * 0.4) * totalLootMult) : 0
++  state.resources.gold += gold
++  state.resources.meat += meat
++  state.resources.herbs += herbs
++  return { gold, meat, herbs }
++}
++
++function applyInjuryIfAny(state, baseChance) {
++  const mods = computeModifiers(state)
++  const chance = baseChance * mods.injuryChanceMult
++  if (Math.random() > chance) return false
++  state._injuredUntil = Math.max(state._injuredUntil ?? 0, Date.now() + 60_000)
++  pushLog(state, "Injury! Efficiency reduced for 60s.")
++  return true
++}
++
++export function startExpedition(state, { risk = 1 }) {
++  const now = Date.now()
++  state.activity.type = "expedition"
++  state.expedition.active = true
++  state.expedition.risk = Math.max(1, Math.min(3, risk))
++  state.expedition.seed = Math.floor(Math.random() * 2 ** 31)
++  state.expedition.roomIndex = 0
++  state.expedition.roomCount = 8 + 2 * state.expedition.risk
++  state.expedition.room = makeRoom(state)
++  state.expedition.pendingChoice = null
++  state.meta.lastTickAt = now
++  pushLog(state, `Expedition started (Risk ${state.expedition.risk}).`)
++}
++
++export function stopExpedition(state) {
++  if (!state.expedition.active) return
++  state.expedition.active = false
++  state.expedition.room = null
++  state.expedition.pendingChoice = null
++  state.activity.type = "idle"
++  pushLog(state, "Expedition ended.")
++}
++
++export function chooseExpeditionOption(state, optionId) {
++  const choice = state.expedition.pendingChoice
++  if (!choice) return
++  const opt = choice.options.find((o) => o.id === optionId)
++  if (!opt) return
++  state.expedition._nextRoomMod = { lootMult: opt.lootMult, difficultyAdd: opt.difficultyAdd }
++  state.expedition.pendingChoice = null
++  pushLog(state, `Chose: ${opt.name}.`)
++  if (!state.expedition.room) state.expedition.room = makeRoom(state)
++}
++
++export function tickExpedition(state, dtSec) {
++  const e = state.expedition
++  if (!e.active) return
++  if (e.pendingChoice) return
++
++  if (!e.room) e.room = makeRoom(state)
++  const room = e.room
++  const isBoss = room.type === "boss"
++
++  if (room.type === "event") {
++    e.pendingChoice = {
++      kind: "route",
++      options: [
++        { id: "safe", name: "Safe path", lootMult: 0.9, difficultyAdd: -1 },
++        { id: "risky", name: "Risky path", lootMult: 1.35, difficultyAdd: +1 },
++      ],
++    }
++    return
++  }
++
++  const injured = (state._injuredUntil ?? 0) > Date.now()
++  const speedMult = injured ? 0.6 : 1
++
++  if (room.type === "rest") {
++    room.progressSec += dtSec * speedMult
++    if (room.progressSec >= room.durationSec) {
++      const used = state.resources.rations > 0
++      if (used) state.resources.rations -= 1
++      if (used) pushLog(state, "Rested and used 1 ration.")
++      else pushLog(state, "Rested (no rations).")
++      room.resolved = true
++    }
++  } else if (room.type === "treasure") {
++    room.progressSec += dtSec * speedMult
++    if (room.progressSec >= room.durationSec) {
++      const loot = awardLoot(state, { difficulty: room.difficulty, isBoss: false, lootMult: room.lootMult })
++      pushLog(state, `Found treasure: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
++      room.resolved = true
++    }
++  } else {
++    // Combat/boss: scale duration by player combat power vs difficulty.
++    const { power, toughness } = computePlayerCombat(state)
++    const enemyPower = 1 + room.difficulty * (1.2 + 0.35 * e.risk) + (isBoss ? 4 : 0)
++    const combatSpeed = Math.max(0.2, power / enemyPower) * speedMult
++    room.progressSec += dtSec * combatSpeed
++
++    if (room.progressSec >= room.durationSec) {
++      const baseXp = (12 + 7 * room.difficulty + (isBoss ? 35 : 0)) * (0.9 + 0.1 * e.risk)
++      state.skills.combat.xp += baseXp * computeModifiers(state).globalXpMult
++      const loot = awardLoot(state, { difficulty: room.difficulty, isBoss, lootMult: room.lootMult })
++
++      // Injury chance depends on (enemy vs toughness), risk, and boss.
++      const danger = Math.max(0.1, enemyPower / Math.max(0.5, toughness))
++      const injuryChance = Math.min(0.35, 0.08 * danger + 0.04 * e.risk + (isBoss ? 0.05 : 0))
++      applyInjuryIfAny(state, injuryChance)
++
++      pushLog(
++        state,
++        `${isBoss ? "Boss defeated" : "Won fight"}: +${Math.floor(baseXp)} combat XP, +${loot.gold} gold.`
++      )
++      room.resolved = true
++      if (isBoss) e.stats.bossesDefeated += 1
++    }
++  }
++
++  if (!room.resolved) return
++
++  e.stats.roomsCleared += 1
++  e.roomIndex += 1
++  if (e.roomIndex >= e.roomCount) {
++    stopExpedition(state)
++    pushLog(state, "Expedition complete. Back to town.")
++    return
++  }
++  e.room = makeRoom(state)
++}
++
+*** Add File: src/game/sim.js
++import { SKILLS } from "./content.js"
++import { canAfford, payCost } from "./math.js"
++import { computeModifiers } from "./modifiers.js"
++import { pushLog } from "./log.js"
++import { RECIPES } from "./recipes.js"
++import { tickExpedition } from "./expedition.js"
++
++function storageCapFor(state) {
++  return computeModifiers(state).storageCap
++}
++
++function addResource(state, resourceId, amount) {
++  const cap = storageCapFor(state)
++  const next = (state.resources[resourceId] ?? 0) + amount
++  state.resources[resourceId] = Math.max(0, Math.min(cap, next))
++}
++
++function addXp(state, skillId, amount) {
++  state.skills[skillId].xp += amount
++}
++
++function tickGather(state, dtSec) {
++  const skillId = state.activity.gatherSkill
++  const skill = SKILLS[skillId]
++  if (!skill?.yields) return
++
++  const mods = computeModifiers(state)
++  const injured = (state._injuredUntil ?? 0) > Date.now()
++  const eff = injured ? 0.6 : 1
++
++  const yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
++  const xpPerSec = (skill.baseXpPerSecond ?? 0) * mods.gatherXpMult * eff
++
++  for (const [rid, mult] of Object.entries(skill.yields)) {
++    addResource(state, rid, yieldPerSec * mult * dtSec)
++  }
++  addXp(state, skillId, xpPerSec * dtSec)
++}
++
++function tickCraft(state, dtSec) {
++  const craft = state.activity.craft ?? {}
++  const recipe = RECIPES[craft.recipeId]
++  if (!recipe) return
++
++  const buildingLevel = state.buildings[recipe.requiresBuilding]?.level ?? 0
++  if (buildingLevel <= 0) return
++
++  craft.progressSec = craft.progressSec ?? 0
++  craft.inProgress = craft.inProgress ?? false
++  craft.remainingSec = craft.remainingSec ?? 0
++
++  const mods = computeModifiers(state)
++  const injured = (state._injuredUntil ?? 0) > Date.now()
++  const eff = injured ? 0.6 : 1
++
++  const speedMult =
++    (recipe.skill === "smithing"
++      ? mods.smithingSpeedMult
++      : recipe.skill === "cooking"
++        ? mods.cookingSpeedMult
++        : recipe.skill === "alchemy"
++          ? mods.alchemySpeedMult
++          : 1) * eff
++
++  let dt = dtSec * speedMult
++  let safety = 0
++
++  while (dt > 0 && safety++ < 100) {
++    if (!craft.inProgress) {
++      if (!canAfford(state.resources, recipe.in)) return
++      payCost(state.resources, recipe.in)
++      craft.inProgress = true
++      craft.remainingSec = recipe.durationSec
++    }
++
++    const step = Math.min(dt, craft.remainingSec)
++    craft.remainingSec -= step
++    dt -= step
++
++    if (craft.remainingSec > 0) continue
++
++    craft.inProgress = false
++
++    for (const [rid, amt] of Object.entries(recipe.out ?? {})) {
++      addResource(state, rid, amt)
++    }
++    addXp(state, recipe.skill, recipe.xp * mods.globalXpMult)
++
++    if (recipe.special === "weapon") {
++      state.equipment.weaponTier = Math.min(10, (state.equipment.weaponTier ?? 0) + 1)
++      pushLog(state, `Crafted weapon tier ${state.equipment.weaponTier}.`)
++    } else if (recipe.special === "armor") {
++      state.equipment.armorTier = Math.min(10, (state.equipment.armorTier ?? 0) + 1)
++      pushLog(state, `Crafted armor tier ${state.equipment.armorTier}.`)
++    }
++  }
++}
++
++export function tickSimulation(state, dtSec) {
++  // Clamp huge dt (tab inactive / sleep) to keep sim stable; offline progress handles longer spans.
++  const dt = Math.max(0, Math.min(1, dtSec))
++
++  // Clear injury flag if time passed (kept as timestamp).
++  if ((state._injuredUntil ?? 0) <= Date.now()) state._injuredUntil = 0
++
++  // Activity tick
++  if (state.activity.type === "gather") tickGather(state, dt)
++  if (state.activity.type === "craft") tickCraft(state, dt)
++  if (state.activity.type === "expedition") tickExpedition(state, dt)
++
++  // Passive trickle: low-value, but keeps the world feeling alive.
++  const workshopLvl = state.buildings.workshop?.level ?? 0
++  if (workshopLvl > 0) {
++    addResource(state, "wood", dt * 0.08 * workshopLvl)
++    addResource(state, "ore", dt * 0.06 * workshopLvl)
++  }
++}
++
++export function runOfflineProgress(state, seconds) {
++  const maxSeconds = 8 * 3600
++  const total = Math.max(0, Math.min(maxSeconds, seconds))
++  if (total <= 1) return 0
++
++  let simulated = 0
++  const step = 1
++  while (simulated + step <= total) {
++    // Stop if expedition needs a choice; don’t auto-pick offline.
++    if (state.expedition?.pendingChoice) break
++    tickSimulation(state, step)
++    simulated += step
++  }
++  return simulated
++}
++
+*** End Patch
+2026-01-18T18:28:45.148589Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/expedition.js
+@@
+ import { mulberry32, randomInt } from "./rng.js"
+ import { computeModifiers } from "./modifiers.js"
+ import { nextLevelProgress } from "./math.js"
+ import { pushLog } from "./log.js"
+ 
++function addResourceCapped(state, resourceId, amount) {
++  const cap = computeModifiers(state).storageCap
++  const next = (state.resources[resourceId] ?? 0) + amount
++  state.resources[resourceId] = Math.max(0, Math.min(cap, next))
++}
++
+ function rollRoomType(rand, roomIndex, roomCount) {
+   if (roomIndex === roomCount - 1) return "boss"
+   const r = rand()
+   if (r < 0.55) return "combat"
+   if (r < 0.7) return "event"
+@@
+ function awardLoot(state, { difficulty, isBoss, lootMult }) {
+   const mods = computeModifiers(state)
+   const totalLootMult = mods.lootMult * lootMult
+   const gold = Math.ceil((6 + 5 * difficulty + (isBoss ? 20 : 0)) * totalLootMult)
+   const meat = Math.random() < 0.65 ? Math.ceil((1 + difficulty * 0.6) * totalLootMult) : 0
+   const herbs = Math.random() < 0.4 ? Math.ceil((1 + difficulty * 0.4) * totalLootMult) : 0
+-  state.resources.gold += gold
+-  state.resources.meat += meat
+-  state.resources.herbs += herbs
++  addResourceCapped(state, "gold", gold)
++  addResourceCapped(state, "meat", meat)
++  addResourceCapped(state, "herbs", herbs)
+   return { gold, meat, herbs }
+ }
+*** End Patch
+2026-01-18T18:28:57.821563Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Add File: src/game/actions.js
++import { BUILDINGS } from "./content.js"
++import { scaleCost, canAfford, payCost, nextLevelProgress } from "./math.js"
++import { pushLog } from "./log.js"
++import { RECIPES } from "./recipes.js"
++import { createDefaultState } from "./state.js"
++
++export function setTab(state, tab) {
++  state.ui.tab = tab
++}
++
++export function setActivityIdle(state) {
++  state.activity.type = "idle"
++  pushLog(state, "Now idle.")
++}
++
++export function startGather(state, skillId) {
++  state.activity.type = "gather"
++  state.activity.gatherSkill = skillId
++  pushLog(state, `Gathering: ${skillId}.`)
++}
++
++export function startCraft(state, recipeId) {
++  const recipe = RECIPES[recipeId]
++  if (!recipe) return
++  const lvl = state.buildings[recipe.requiresBuilding]?.level ?? 0
++  if (lvl <= 0) return
++  state.activity.type = "craft"
++  state.activity.craft = { recipeId, inProgress: false, remainingSec: 0 }
++  pushLog(state, `Crafting: ${recipe.name}.`)
++}
++
++export function buildingNextCost(state, buildingId) {
++  const b = BUILDINGS[buildingId]
++  const current = state.buildings[buildingId]?.level ?? 0
++  return scaleCost(b.baseCost, b.costScale, current + 1)
++}
++
++export function upgradeBuilding(state, buildingId) {
++  const b = BUILDINGS[buildingId]
++  if (!b) return
++  const current = state.buildings[buildingId]?.level ?? 0
++  const cost = buildingNextCost(state, buildingId)
++  if (!canAfford(state.resources, cost)) return
++  payCost(state.resources, cost)
++  state.buildings[buildingId].level = current + 1
++  pushLog(state, `Upgraded ${b.name} to level ${current + 1}.`)
++}
++
++function canPrestige(state) {
++  const hall = state.buildings.townHall?.level ?? 0
++  const bosses = state.expedition?.stats?.bossesDefeated ?? 0
++  return hall >= 1 && bosses >= 1
++}
++
++function computePrestigeGain(state) {
++  const hall = state.buildings.townHall?.level ?? 0
++  const bosses = state.expedition?.stats?.bossesDefeated ?? 0
++  let totalLevels = 0
++  for (const [id, s] of Object.entries(state.skills)) {
++    totalLevels += nextLevelProgress(s.xp).level
++  }
++  const gain = Math.floor(bosses * 2 + hall + totalLevels / 25)
++  return Math.max(1, gain)
++}
++
++export function foundNewSettlement(state) {
++  if (!canPrestige(state)) return false
++  const gain = computePrestigeGain(state)
++  const legacy = state.legacy
++  const next = createDefaultState()
++  next.legacy = {
++    ...legacy,
++    points: (legacy?.points ?? 0) + gain,
++    bonuses: legacy?.bonuses ?? { globalXpMult: 1, globalYieldMult: 1 },
++  }
++  next.ui.tab = "prestige"
++  Object.assign(state, next)
++  pushLog(state, `Founded a new settlement. Gained ${gain} legacy point${gain === 1 ? "" : "s"}.`)
++  return true
++}
++
++export function buyLegacyUpgrade(state, upgradeId) {
++  if ((state.legacy?.points ?? 0) < 1) return false
++  state.legacy.points -= 1
++  if (upgradeId === "xp") {
++    state.legacy.bonuses.globalXpMult = (state.legacy.bonuses.globalXpMult ?? 1) * 1.05
++    pushLog(state, "Legacy: +5% global XP.")
++    return true
++  }
++  if (upgradeId === "yield") {
++    state.legacy.bonuses.globalYieldMult = (state.legacy.bonuses.globalYieldMult ?? 1) * 1.05
++    pushLog(state, "Legacy: +5% global yield.")
++    return true
++  }
++  // Refund if unknown
++  state.legacy.points += 1
++  return false
++}
++
+*** End Patch
+2026-01-18T18:29:24.019860Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/store.js
+@@
+ export function createStore({ storageKey }) {
+   /** @type {ReturnType<typeof createDefaultState>} */
+   let state = createDefaultState()
+   const listeners = new Set()
+   let dirty = false
+@@
+   function load() {
+     const rawText = localStorage.getItem(storageKey)
+     if (!rawText) return
+     const raw = safeJsonParse(rawText)
+     const migrated = migrateSave(raw)
+     if (!migrated) return
+     state = migrated
+     dirty = false
+     notify()
+   }
+ 
++  function replace(nextState) {
++    const migrated = migrateSave(nextState)
++    if (!migrated) return false
++    state = migrated
++    dirty = true
++    notify()
++    return true
++  }
++
+   function save() {
+     if (!dirty) return
+     localStorage.setItem(storageKey, JSON.stringify(state))
+     dirty = false
+   }
+@@
+   function hardReset() {
+     state = createDefaultState()
+     dirty = true
+     save()
+     notify()
+   }
+ 
+-  return { getState, update, subscribe, load, save, hardReset }
++  return { getState, update, subscribe, load, replace, save, hardReset }
+ }
+*** End Patch
+2026-01-18T18:30:23.400265Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Add File: src/game/ui.js
++import { BUILDINGS, RESOURCES, SKILLS } from "./content.js"
++import { nextLevelProgress } from "./math.js"
++import { formatInt, formatNumber, formatSeconds } from "./format.js"
++import {
++  buildingNextCost,
++  buyLegacyUpgrade,
++  foundNewSettlement,
++  setActivityIdle,
++  setTab,
++  startCraft,
++  startGather,
++  upgradeBuilding,
++} from "./actions.js"
++import { chooseExpeditionOption, startExpedition, stopExpedition } from "./expedition.js"
++import { RECIPES } from "./recipes.js"
++import { computeModifiers } from "./modifiers.js"
++
++function escapeHtml(s) {
++  return String(s)
++    .replaceAll("&", "&amp;")
++    .replaceAll("<", "&lt;")
++    .replaceAll(">", "&gt;")
++    .replaceAll('"', "&quot;")
++}
++
++function renderCost(cost) {
++  const parts = []
++  for (const [rid, amt] of Object.entries(cost)) {
++    const name = RESOURCES[rid]?.name ?? rid
++    parts.push(`${escapeHtml(name)}: ${formatInt(amt)}`)
++  }
++  return parts.join(" · ")
++}
++
++function isInjured(state) {
++  return (state._injuredUntil ?? 0) > Date.now()
++}
++
++export function createUI({ root, store }) {
++  let scheduled = false
++
++  function scheduleRender() {
++    if (scheduled) return
++    scheduled = true
++    requestAnimationFrame(() => {
++      scheduled = false
++      render()
++    })
++  }
++
++  function renderResources(state) {
++    const cap = computeModifiers(state).storageCap
++    const rows = Object.keys(RESOURCES)
++      .map((rid) => {
++        const r = RESOURCES[rid]
++        const v = state.resources[rid] ?? 0
++        const c = rid === "gold" ? "res res--gold" : "res"
++        return `<div class="${c}"><div class="res__name">${escapeHtml(r.name)}</div><div class="res__val">${formatInt(v)} <span class="muted">/ ${formatInt(cap)}</span></div></div>`
++      })
++      .join("")
++    return `<div class="resGrid">${rows}</div>`
++  }
++
++  function renderActions(state) {
++    const forge = state.buildings.forge?.level ?? 0
++    const camp = state.buildings.campfire?.level ?? 0
++    const alc = state.buildings.alchemistHut?.level ?? 0
++
++    const activity = state.activity.type
++    const activeLabel =
++      activity === "idle"
++        ? "Idle"
++        : activity === "gather"
++          ? `Gathering (${SKILLS[state.activity.gatherSkill]?.name ?? state.activity.gatherSkill})`
++          : activity === "craft"
++            ? `Crafting (${RECIPES[state.activity.craft?.recipeId]?.name ?? "?"})`
++            : activity === "expedition"
++              ? "On Expedition"
++              : activity
++
++    return `
++      <div class="card">
++        <div class="card__title">Actions</div>
++        <div class="row">
++          <div class="pill">${escapeHtml(activeLabel)}${isInjured(state) ? ' <span class="bad">Injured</span>' : ""}</div>
++          <button class="btn" data-action="activity-idle">Idle</button>
++        </div>
++        <div class="row">
++          <button class="btn" data-action="activity-gather" data-skill="woodcutting">Woodcut</button>
++          <button class="btn" data-action="activity-gather" data-skill="mining">Mine</button>
++        </div>
++        <div class="row">
++          <button class="btn" data-action="activity-craft" data-recipe="smeltBars" ${forge <= 0 ? "disabled" : ""}>Smelt Bars</button>
++          <button class="btn" data-action="activity-craft" data-recipe="craftWeapon" ${forge <= 0 ? "disabled" : ""}>Weapon +1</button>
++          <button class="btn" data-action="activity-craft" data-recipe="craftArmor" ${forge <= 0 ? "disabled" : ""}>Armor +1</button>
++        </div>
++        <div class="row">
++          <button class="btn" data-action="activity-craft" data-recipe="cookRations" ${camp <= 0 ? "disabled" : ""}>Cook Rations</button>
++          <button class="btn" data-action="activity-craft" data-recipe="brewPotions" ${alc <= 0 ? "disabled" : ""}>Brew Potions</button>
++        </div>
++      </div>
++    `
++  }
++
++  function renderTown(state) {
++    const cards = Object.keys(BUILDINGS)
++      .map((bid) => {
++        const b = BUILDINGS[bid]
++        const lvl = state.buildings[bid]?.level ?? 0
++        const cost = buildingNextCost(state, bid)
++        return `
++          <div class="card">
++            <div class="card__title">${escapeHtml(b.name)} <span class="muted">Lv ${lvl}</span></div>
++            <div class="muted">${escapeHtml(b.desc)}</div>
++            <div class="muted small">Next: ${renderCost(cost)}</div>
++            <div class="row">
++              <button class="btn" data-action="upgrade-building" data-building="${escapeHtml(bid)}">Upgrade</button>
++            </div>
++          </div>
++        `
++      })
++      .join("")
++    return `<div class="stack">${renderActions(state)}${cards}</div>`
++  }
++
++  function renderSkills(state) {
++    const skills = Object.keys(SKILLS)
++      .map((sid) => {
++        const s = SKILLS[sid]
++        const xp = state.skills[sid]?.xp ?? 0
++        const p = nextLevelProgress(xp)
++        const pct = Math.floor(p.pct * 100)
++        return `
++          <div class="card">
++            <div class="card__title">${escapeHtml(s.name)} <span class="muted">Lv ${p.level}</span></div>
++            <div class="bar"><div class="bar__fill" style="width:${pct}%"></div></div>
++            <div class="muted small">${formatInt(Math.floor(p.xpIntoLevel))} / ${formatInt(p.xpForNext)} XP</div>
++          </div>
++        `
++      })
++      .join("")
++    return `<div class="stack">${renderActions(state)}${skills}</div>`
++  }
++
++  function renderExpedition(state) {
++    const e = state.expedition
++    if (!e.active) {
++      const canStart = (state.resources.rations ?? 0) > 0 || (state.resources.meat ?? 0) > 0
++      return `
++        <div class="stack">
++          ${renderActions(state)}
++          <div class="card">
++            <div class="card__title">Expeditions</div>
++            <div class="muted">Prep in town, then explore room-by-room. Boss is always the last room.</div>
++            <div class="row">
++              <button class="btn" data-action="expedition-start" data-risk="1" ${canStart ? "" : ""}>Start (Risk 1)</button>
++              <button class="btn" data-action="expedition-start" data-risk="2" ${canStart ? "" : ""}>Start (Risk 2)</button>
++              <button class="btn" data-action="expedition-start" data-risk="3" ${canStart ? "" : ""}>Start (Risk 3)</button>
++            </div>
++            <div class="muted small">Tip: cook rations for safer runs.</div>
++          </div>
++        </div>
++      `
++    }
++
++    const room = e.room
++    const roomName =
++      room?.type === "combat"
++        ? "Combat"
++        : room?.type === "boss"
++          ? "Boss"
++          : room?.type === "rest"
++            ? "Rest"
++            : room?.type === "treasure"
++              ? "Treasure"
++              : room?.type === "event"
++                ? "Event"
++                : "Unknown"
++
++    const pct = room?.durationSec ? Math.floor((room.progressSec / room.durationSec) * 100) : 0
++    const remaining = room?.durationSec ? Math.max(0, room.durationSec - room.progressSec) : 0
++
++    const choice = e.pendingChoice
++    const choiceUi = choice
++      ? `
++          <div class="card">
++            <div class="card__title">Decision</div>
++            <div class="row">
++              ${choice.options
++                .map(
++                  (o) =>
++                    `<button class="btn" data-action="expedition-choice" data-choice="${escapeHtml(o.id)}">${escapeHtml(o.name)}</button>`
++                )
++                .join("")}
++            </div>
++            <div class="muted small">Offline progress pauses at decisions.</div>
++          </div>
++        `
++      : ""
++
++    return `
++      <div class="stack">
++        ${renderActions(state)}
++        <div class="card">
++          <div class="card__title">On Expedition <span class="muted">Risk ${e.risk}</span></div>
++          <div class="row">
++            <div class="pill">Room ${e.roomIndex + 1} / ${e.roomCount}</div>
++            <div class="pill">${roomName} · Diff ${room?.difficulty ?? "?"}</div>
++            <button class="btn btn--warn" data-action="expedition-stop">Return</button>
++          </div>
++          <div class="bar"><div class="bar__fill" style="width:${Math.max(0, Math.min(100, pct))}%"></div></div>
++          <div class="muted small">${formatSeconds(remaining)} remaining</div>
++        </div>
++        ${choiceUi}
++        <div class="card">
++          <div class="card__title">Supplies</div>
++          <div class="row">
++            <div class="pill">Rations: ${formatInt(state.resources.rations ?? 0)}</div>
++            <div class="pill">Potions: ${formatInt(state.resources.potions ?? 0)}</div>
++          </div>
++          <div class="muted small">Gear: Weapon T${state.equipment.weaponTier ?? 0} · Armor T${state.equipment.armorTier ?? 0}</div>
++        </div>
++      </div>
++    `
++  }
++
++  function renderPrestige(state) {
++    const hall = state.buildings.townHall?.level ?? 0
++    const bosses = state.expedition?.stats?.bossesDefeated ?? 0
++    const eligible = hall >= 1 && bosses >= 1
++    const xpMult = state.legacy?.bonuses?.globalXpMult ?? 1
++    const yieldMult = state.legacy?.bonuses?.globalYieldMult ?? 1
++
++    return `
++      <div class="stack">
++        <div class="card">
++          <div class="card__title">Legacy</div>
++          <div class="row">
++            <div class="pill">Points: ${formatInt(state.legacy?.points ?? 0)}</div>
++            <div class="pill">XP: ${formatNumber(xpMult, 3)}×</div>
++            <div class="pill">Yield: ${formatNumber(yieldMult, 3)}×</div>
++          </div>
++          <div class="row">
++            <button class="btn" data-action="legacy-buy" data-upgrade="xp" ${(state.legacy?.points ?? 0) < 1 ? "disabled" : ""}>Buy +5% XP</button>
++            <button class="btn" data-action="legacy-buy" data-upgrade="yield" ${(state.legacy?.points ?? 0) < 1 ? "disabled" : ""}>Buy +5% Yield</button>
++          </div>
++          <div class="muted small">Each purchase costs 1 point.</div>
++        </div>
++        <div class="card">
++          <div class="card__title">Found New Settlement</div>
++          <div class="muted">Requires Town Hall Lv 1+ and at least 1 boss defeated.</div>
++          <div class="row">
++            <div class="pill">Town Hall: Lv ${hall}</div>
++            <div class="pill">Bosses: ${bosses}</div>
++          </div>
++          <div class="row">
++            <button class="btn btn--warn" data-action="prestige-found" ${eligible ? "" : "disabled"}>Found New Settlement</button>
++          </div>
++        </div>
++      </div>
++    `
++  }
++
++  function renderSettings(state) {
++    return `
++      <div class="stack">
++        <div class="card">
++          <div class="card__title">Save</div>
++          <div class="row">
++            <button class="btn" data-action="save-export">Export</button>
++            <button class="btn" data-action="save-import">Import</button>
++            <button class="btn btn--warn" data-action="save-reset">Hard Reset</button>
++          </div>
++          <textarea id="saveBox" class="saveBox" spellcheck="false" placeholder="Exported save appears here. Paste a save here to import."></textarea>
++        </div>
++      </div>
++    `
++  }
++
++  function renderPanel(state) {
++    if (state.ui.tab === "town") return renderTown(state)
++    if (state.ui.tab === "skills") return renderSkills(state)
++    if (state.ui.tab === "expedition") return renderExpedition(state)
++    if (state.ui.tab === "prestige") return renderPrestige(state)
++    if (state.ui.tab === "settings") return renderSettings(state)
++    return renderTown(state)
++  }
++
++  function renderTabs(state) {
++    const tabs = [
++      ["town", "Town"],
++      ["skills", "Skills"],
++      ["expedition", "Expedition"],
++      ["prestige", "Prestige"],
++      ["settings", "Settings"],
++    ]
++    return tabs
++      .map(([id, label]) => {
++        const active = state.ui.tab === id ? "tab tab--active" : "tab"
++        return `<button class="${active}" data-action="tab" data-tab="${escapeHtml(id)}">${escapeHtml(label)}</button>`
++      })
++      .join("")
++  }
++
++  function renderLog(state) {
++    const lines = (state.ui.log ?? []).slice(0, 14)
++    if (lines.length === 0) return `<div class="muted small">No log yet.</div>`
++    return lines.map((l) => `<div class="logLine">${escapeHtml(l)}</div>`).join("")
++  }
++
++  function render() {
++    const state = store.getState()
++    root.innerHTML = `
++      <div class="hud">
++        <div class="hudTop">
++          <div class="title">Frontier Idle</div>
++          <div class="hudMeta">
++            <span class="pill">Storage: ${formatInt(computeModifiers(state).storageCap)}</span>
++            <span class="pill">Legacy: ${formatInt(state.legacy?.points ?? 0)}</span>
++          </div>
++        </div>
++        ${renderResources(state)}
++        <div class="tabs">${renderTabs(state)}</div>
++        <div class="panel">${renderPanel(state)}</div>
++        <div class="log">
++          <div class="logTitle">Log</div>
++          <div class="logBody">${renderLog(state)}</div>
++        </div>
++      </div>
++    `
++  }
++
++  function onClick(e) {
++    const target = e.target?.closest?.("[data-action]")
++    if (!target) return
++    const action = target.getAttribute("data-action")
++
++    if (action === "tab") {
++      const tab = target.getAttribute("data-tab")
++      store.update((s) => setTab(s, tab))
++      return
++    }
++
++    if (action === "upgrade-building") {
++      const buildingId = target.getAttribute("data-building")
++      store.update((s) => upgradeBuilding(s, buildingId))
++      return
++    }
++
++    if (action === "activity-idle") {
++      store.update((s) => setActivityIdle(s))
++      return
++    }
++
++    if (action === "activity-gather") {
++      const skillId = target.getAttribute("data-skill")
++      store.update((s) => startGather(s, skillId))
++      return
++    }
++
++    if (action === "activity-craft") {
++      const recipeId = target.getAttribute("data-recipe")
++      store.update((s) => startCraft(s, recipeId))
++      return
++    }
++
++    if (action === "expedition-start") {
++      const risk = Number(target.getAttribute("data-risk") || 1)
++      store.update((s) => startExpedition(s, { risk }))
++      store.update((s) => setTab(s, "expedition"))
++      return
++    }
++
++    if (action === "expedition-stop") {
++      store.update((s) => stopExpedition(s))
++      return
++    }
++
++    if (action === "expedition-choice") {
++      const choiceId = target.getAttribute("data-choice")
++      store.update((s) => chooseExpeditionOption(s, choiceId))
++      return
++    }
++
++    if (action === "prestige-found") {
++      store.update((s) => foundNewSettlement(s))
++      return
++    }
++
++    if (action === "legacy-buy") {
++      const upgradeId = target.getAttribute("data-upgrade")
++      store.update((s) => buyLegacyUpgrade(s, upgradeId))
++      return
++    }
++
++    if (action === "save-export") {
++      const box = root.querySelector("#saveBox")
++      if (box) box.value = JSON.stringify(store.getState())
++      return
++    }
++
++    if (action === "save-import") {
++      const box = root.querySelector("#saveBox")
++      if (!box) return
++      const raw = box.value?.trim()
++      if (!raw) return
++      try {
++        const parsed = JSON.parse(raw)
++        const ok = store.replace(parsed)
++        if (ok) store.save()
++      } catch {
++        // ignore; user can correct
++      }
++      return
++    }
++
++    if (action === "save-reset") {
++      store.hardReset()
++      return
++    }
++  }
++
++  root.addEventListener("click", onClick)
++  const unsub = store.subscribe(scheduleRender)
++  render()
++
++  return {
++    destroy() {
++      root.removeEventListener("click", onClick)
++      unsub()
++    },
++  }
++}
++
+*** End Patch
+2026-01-18T18:30:32.312589Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Add File: src/game/app.js
++import { createStore } from "./store.js"
++import { createUI } from "./ui.js"
++import { runOfflineProgress, tickSimulation } from "./sim.js"
++import { pushLog } from "./log.js"
++
++const STORAGE_KEY = "frontier-idle.save.v1"
++
++export function createGameApp() {
++  const hudRoot = document.getElementById("hud")
++  if (!hudRoot) throw new Error("Missing #hud element")
++
++  const store = createStore({ storageKey: STORAGE_KEY })
++  store.load()
++
++  // Offline progress
++  store.update((state) => {
++    const now = Date.now()
++    const last = state.meta?.lastTickAt ?? now
++    const elapsedSec = Math.max(0, (now - last) / 1000)
++    const simulated = runOfflineProgress(state, elapsedSec)
++    if (simulated >= 10) pushLog(state, `Offline progress: simulated ${Math.floor(simulated)}s.`)
++    state.meta.lastTickAt = now
++  })
++
++  const ui = createUI({ root: hudRoot, store })
++
++  const saveTimer = setInterval(() => store.save(), 5000)
++  window.addEventListener("beforeunload", () => store.save())
++
++  function tick(dtSec) {
++    store.update((state) => {
++      tickSimulation(state, dtSec)
++      state.meta.lastTickAt = Date.now()
++    })
++  }
++
++  return {
++    store,
++    tick,
++    destroy() {
++      clearInterval(saveTimer)
++      ui.destroy()
++      store.save()
++    },
++  }
++}
++
+*** End Patch
+2026-01-18T18:30:35.487899Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/expedition.js
+@@
+ export function startExpedition(state, { risk = 1 }) {
+   const now = Date.now()
++  if ((state.resources.rations ?? 0) > 0) state.resources.rations -= 1
++  else if ((state.resources.meat ?? 0) > 0) state.resources.meat -= 1
+   state.activity.type = "expedition"
+   state.expedition.active = true
+   state.expedition.risk = Math.max(1, Math.min(3, risk))
+   state.expedition.seed = Math.floor(Math.random() * 2 ** 31)
+   state.expedition.roomIndex = 0
+   state.expedition.roomCount = 8 + 2 * state.expedition.risk
+   state.expedition.room = makeRoom(state)
+   state.expedition.pendingChoice = null
+   state.meta.lastTickAt = now
+   pushLog(state, `Expedition started (Risk ${state.expedition.risk}).`)
+ }
+*** End Patch
+2026-01-18T18:30:41.459820Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: index.html
+@@
+   <body>
+     <canvas class="webgl"></canvas>
++    <div id="hud"></div>
+     <script type="module" src="/main.js"></script>
+   </body>
+ </html>
+*** End Patch
+2026-01-18T18:31:04.272036Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: style.css
+@@
+ *
+ {
+     margin: 0;
+     padding: 0;
++    box-sizing: border-box;
+ }
+ 
+ html,
+ body
+ {
+     overflow: hidden;
++    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+ }
+ 
+ .webgl
+ {
+     position: fixed;
+     top: 0;
+     left: 0;
+     outline: none;
++    z-index: 0;
+ }
++
++#hud {
++    position: fixed;
++    top: 12px;
++    left: 12px;
++    width: min(440px, calc(100vw - 24px));
++    height: calc(100vh - 24px);
++    z-index: 10;
++    pointer-events: auto;
++}
++
++.hud {
++    height: 100%;
++    overflow: auto;
++    padding: 12px;
++    border-radius: 14px;
++    background: rgba(12, 14, 20, 0.78);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++    backdrop-filter: blur(10px);
++    color: #e9eef6;
++}
++
++.hudTop {
++    display: flex;
++    align-items: baseline;
++    justify-content: space-between;
++    gap: 10px;
++    margin-bottom: 10px;
++}
++
++.title {
++    font-size: 16px;
++    font-weight: 700;
++    letter-spacing: 0.2px;
++}
++
++.hudMeta {
++    display: flex;
++    gap: 8px;
++    flex-wrap: wrap;
++    justify-content: flex-end;
++}
++
++.muted {
++    color: rgba(233, 238, 246, 0.72);
++}
++
++.muted.small {
++    font-size: 12px;
++}
++
++.bad {
++    color: #ff6b6b;
++    font-weight: 700;
++}
++
++.pill {
++    display: inline-flex;
++    align-items: center;
++    gap: 6px;
++    padding: 6px 10px;
++    border-radius: 999px;
++    background: rgba(255, 255, 255, 0.06);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++    font-size: 12px;
++    white-space: nowrap;
++}
++
++.tabs {
++    display: grid;
++    grid-template-columns: repeat(5, 1fr);
++    gap: 6px;
++    margin: 10px 0;
++}
++
++.tab {
++    padding: 8px 10px;
++    border-radius: 10px;
++    border: 1px solid rgba(255, 255, 255, 0.08);
++    background: rgba(255, 255, 255, 0.04);
++    color: inherit;
++    font-size: 12px;
++    cursor: pointer;
++}
++
++.tab--active {
++    background: rgba(86, 142, 255, 0.16);
++    border-color: rgba(86, 142, 255, 0.38);
++}
++
++.panel {
++    display: block;
++}
++
++.resGrid {
++    display: grid;
++    grid-template-columns: repeat(2, 1fr);
++    gap: 8px;
++    margin-top: 10px;
++}
++
++.res {
++    padding: 10px;
++    border-radius: 12px;
++    background: rgba(255, 255, 255, 0.05);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++}
++
++.res__name {
++    font-size: 12px;
++    color: rgba(233, 238, 246, 0.72);
++}
++
++.res__val {
++    font-size: 14px;
++    font-weight: 700;
++    margin-top: 4px;
++}
++
++.res--gold {
++    background: rgba(255, 215, 0, 0.08);
++    border-color: rgba(255, 215, 0, 0.18);
++}
++
++.stack {
++    display: flex;
++    flex-direction: column;
++    gap: 10px;
++}
++
++.card {
++    padding: 12px;
++    border-radius: 14px;
++    background: rgba(255, 255, 255, 0.04);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++}
++
++.card__title {
++    font-size: 13px;
++    font-weight: 800;
++    margin-bottom: 6px;
++}
++
++.row {
++    display: flex;
++    gap: 8px;
++    flex-wrap: wrap;
++    align-items: center;
++    margin-top: 8px;
++}
++
++.btn {
++    padding: 8px 10px;
++    border-radius: 10px;
++    border: 1px solid rgba(255, 255, 255, 0.12);
++    background: rgba(255, 255, 255, 0.06);
++    color: inherit;
++    cursor: pointer;
++    font-size: 12px;
++}
++
++.btn:disabled {
++    opacity: 0.4;
++    cursor: not-allowed;
++}
++
++.btn--warn {
++    background: rgba(255, 99, 99, 0.12);
++    border-color: rgba(255, 99, 99, 0.28);
++}
++
++.bar {
++    height: 10px;
++    border-radius: 999px;
++    overflow: hidden;
++    background: rgba(255, 255, 255, 0.06);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++}
++
++.bar__fill {
++    height: 100%;
++    background: linear-gradient(90deg, rgba(86, 142, 255, 0.85), rgba(86, 255, 194, 0.85));
++}
++
++.log {
++    margin-top: 10px;
++    padding-top: 10px;
++    border-top: 1px solid rgba(255, 255, 255, 0.08);
++}
++
++.logTitle {
++    font-size: 12px;
++    font-weight: 800;
++    margin-bottom: 6px;
++}
++
++.logBody {
++    display: flex;
++    flex-direction: column;
++    gap: 4px;
++    font-size: 12px;
++    color: rgba(233, 238, 246, 0.75);
++}
++
++.logLine {
++    line-height: 1.25;
++}
++
++.saveBox {
++    width: 100%;
++    min-height: 140px;
++    margin-top: 10px;
++    padding: 10px;
++    border-radius: 12px;
++    border: 1px solid rgba(255, 255, 255, 0.1);
++    background: rgba(0, 0, 0, 0.3);
++    color: rgba(233, 238, 246, 0.92);
++    resize: vertical;
++    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
++    font-size: 12px;
++}
+*** End Patch
+2026-01-18T18:31:18.179091Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/app.js
+@@
+ export function createGameApp() {
+@@
+   const saveTimer = setInterval(() => store.save(), 5000)
+   window.addEventListener("beforeunload", () => store.save())
+ 
+-  function tick(dtSec) {
+-    store.update((state) => {
+-      tickSimulation(state, dtSec)
+-      state.meta.lastTickAt = Date.now()
+-    })
+-  }
++  let acc = 0
++  const step = 0.1
++  function tick(dtSec) {
++    const dt = Math.max(0, Math.min(0.5, dtSec))
++    acc += dt
++    if (acc < step) return
++    const steps = Math.min(20, Math.floor(acc / step))
++    acc -= steps * step
++    store.update((state) => {
++      for (let i = 0; i < steps; i++) tickSimulation(state, step)
++      state.meta.lastTickAt = Date.now()
++    })
++  }
+ 
+   return {
+     store,
+     tick,
+*** End Patch
+2026-01-18T18:31:22.007917Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+   function renderExpedition(state) {
+     const e = state.expedition
+     if (!e.active) {
+       const canStart = (state.resources.rations ?? 0) > 0 || (state.resources.meat ?? 0) > 0
+       return `
+         <div class="stack">
+           ${renderActions(state)}
+           <div class="card">
+             <div class="card__title">Expeditions</div>
+             <div class="muted">Prep in town, then explore room-by-room. Boss is always the last room.</div>
+             <div class="row">
+-              <button class="btn" data-action="expedition-start" data-risk="1" ${canStart ? "" : ""}>Start (Risk 1)</button>
+-              <button class="btn" data-action="expedition-start" data-risk="2" ${canStart ? "" : ""}>Start (Risk 2)</button>
+-              <button class="btn" data-action="expedition-start" data-risk="3" ${canStart ? "" : ""}>Start (Risk 3)</button>
++              <button class="btn" data-action="expedition-start" data-risk="1" ${canStart ? "" : "disabled"}>Start (Risk 1)</button>
++              <button class="btn" data-action="expedition-start" data-risk="2" ${canStart ? "" : "disabled"}>Start (Risk 2)</button>
++              <button class="btn" data-action="expedition-start" data-risk="3" ${canStart ? "" : "disabled"}>Start (Risk 3)</button>
+             </div>
+             <div class="muted small">Tip: cook rations for safer runs.</div>
+           </div>
+         </div>
+       `
+     }
+*** End Patch
+2026-01-18T18:31:27.048240Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: main.js
+@@
+ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+ import firefliesVertexShader from './shaders/fireflies/vertex.glsl'
+ import firefliesFragmentShader from './shaders/fireflies/fragment.glsl'
++import { createGameApp } from "./src/game/app.js"
+@@
+ const renderer = new THREE.WebGLRenderer({
+   canvas: canvas,
+   antialias: true,
+ });
+ renderer.setSize(sizes.width, sizes.height);
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+@@
+ renderer.setClearColor(debugObject.clearColor);
+ 
++// Game UI + simulation
++const game = createGameApp()
++
+ /**
+  * Animate
+  */
+ let previousTime = 0
+ const clock = new THREE.Clock();
+ 
+ function animate() {
+   const elapsedTime = clock.getElapsedTime();
+@@
+   const deltaTime = elapsedTime - previousTime
+   previousTime = elapsedTime
++  game.tick(deltaTime)
+ 
+   // Model animation
+   if(mixer)
+   {
+       mixer.update(deltaTime)
+   }
+*** End Patch
+2026-01-18T18:31:39.326505Z  INFO ToolCall: shell_command {"command":"node -e \"import('./src/game/sim.js'); import('./src/game/expedition.js'); import('./src/game/ui.js').catch(()=>{});\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:31:45.319153Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/actions.js
+@@
+ import { BUILDINGS } from "./content.js"
+ import { scaleCost, canAfford, payCost, nextLevelProgress } from "./math.js"
+ import { pushLog } from "./log.js"
+ import { RECIPES } from "./recipes.js"
+ import { createDefaultState } from "./state.js"
++import { SKILLS } from "./content.js"
+@@
+ export function startGather(state, skillId) {
+   state.activity.type = "gather"
+   state.activity.gatherSkill = skillId
+-  pushLog(state, `Gathering: ${skillId}.`)
++  pushLog(state, `Gathering: ${(SKILLS[skillId]?.name ?? skillId)}.`)
+ }
+*** End Patch
+2026-01-18T18:31:49.804241Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/actions.js
+@@
+-import { BUILDINGS } from "./content.js"
++import { BUILDINGS, SKILLS } from "./content.js"
+@@
+-import { createDefaultState } from "./state.js"
+-import { SKILLS } from "./content.js"
++import { createDefaultState } from "./state.js"
+*** End Patch
+2026-01-18T18:32:04.666620Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/expedition.js
+@@
+ export function chooseExpeditionOption(state, optionId) {
+   const choice = state.expedition.pendingChoice
+   if (!choice) return
+   const opt = choice.options.find((o) => o.id === optionId)
+   if (!opt) return
+   state.expedition._nextRoomMod = { lootMult: opt.lootMult, difficultyAdd: opt.difficultyAdd }
+   state.expedition.pendingChoice = null
+   pushLog(state, `Chose: ${opt.name}.`)
+-  if (!state.expedition.room) state.expedition.room = makeRoom(state)
++
++  // Resolve the current event room and move on.
++  if (state.expedition.room?.type === "event") {
++    state.expedition.stats.roomsCleared += 1
++    state.expedition.roomIndex += 1
++    if (state.expedition.roomIndex >= state.expedition.roomCount) {
++      stopExpedition(state)
++      pushLog(state, "Expedition complete. Back to town.")
++      return
++    }
++    state.expedition.room = makeRoom(state)
++    return
++  }
++
++  if (!state.expedition.room) state.expedition.room = makeRoom(state)
+ }
+*** End Patch
+2026-01-18T18:32:22.263817Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/state.js
+@@
+ export function createDefaultState(now = Date.now()) {
+@@
+     meta: {
+       createdAt: now,
+       updatedAt: now,
+       lastTickAt: now,
++      simTimeMs: now,
+     },
+*** End Patch
+2026-01-18T18:32:28.023789Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/sim.js
+@@
+ import { tickExpedition } from "./expedition.js"
+ 
+ function storageCapFor(state) {
+   return computeModifiers(state).storageCap
+ }
+@@
+ function tickGather(state, dtSec) {
+   const skillId = state.activity.gatherSkill
+   const skill = SKILLS[skillId]
+   if (!skill?.yields) return
+ 
+   const mods = computeModifiers(state)
+-  const injured = (state._injuredUntil ?? 0) > Date.now()
++  const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
+   const eff = injured ? 0.6 : 1
+@@
+ function tickCraft(state, dtSec) {
+@@
+   const mods = computeModifiers(state)
+-  const injured = (state._injuredUntil ?? 0) > Date.now()
++  const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
+   const eff = injured ? 0.6 : 1
+@@
+ export function tickSimulation(state, dtSec) {
+   // Clamp huge dt (tab inactive / sleep) to keep sim stable; offline progress handles longer spans.
+   const dt = Math.max(0, Math.min(1, dtSec))
+ 
+-  // Clear injury flag if time passed (kept as timestamp).
+-  if ((state._injuredUntil ?? 0) <= Date.now()) state._injuredUntil = 0
++  state.meta.simTimeMs = (state.meta.simTimeMs ?? Date.now()) + dt * 1000
++
++  // Clear injury flag if time passed (kept as sim-time timestamp).
++  if ((state._injuredUntil ?? 0) <= state.meta.simTimeMs) state._injuredUntil = 0
+ 
+   // Activity tick
+   if (state.activity.type === "gather") tickGather(state, dt)
+   if (state.activity.type === "craft") tickCraft(state, dt)
+   if (state.activity.type === "expedition") tickExpedition(state, dt)
+*** End Patch
+2026-01-18T18:32:31.280502Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/expedition.js
+@@
+ function applyInjuryIfAny(state, baseChance) {
+   const mods = computeModifiers(state)
+   const chance = baseChance * mods.injuryChanceMult
+   if (Math.random() > chance) return false
+-  state._injuredUntil = Math.max(state._injuredUntil ?? 0, Date.now() + 60_000)
++  const now = state.meta?.simTimeMs ?? Date.now()
++  state._injuredUntil = Math.max(state._injuredUntil ?? 0, now + 60_000)
+   pushLog(state, "Injury! Efficiency reduced for 60s.")
+   return true
+ }
+@@
+ export function tickExpedition(state, dtSec) {
+   const e = state.expedition
+   if (!e.active) return
+   if (e.pendingChoice) return
+@@
+-  const injured = (state._injuredUntil ?? 0) > Date.now()
++  const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
+   const speedMult = injured ? 0.6 : 1
+*** End Patch
+2026-01-18T18:32:34.356880Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+ function isInjured(state) {
+-  return (state._injuredUntil ?? 0) > Date.now()
++  return (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
+ }
+*** End Patch
+2026-01-18T18:32:50.169062Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"completed"},{"step":"Design state and content data", "status":"completed"},{"step":"Implement simulation and persistence", "status":"completed"},{"step":"Build UI screens and controls", "status":"in_progress"},{"step":"Integrate with Three.js background", "status":"pending"},{"step":"Sanity-check in-node utilities", "status":"pending"}]}
+2026-01-18T18:32:55.029796Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"completed"},{"step":"Design state and content data", "status":"completed"},{"step":"Implement simulation and persistence", "status":"completed"},{"step":"Build UI screens and controls", "status":"completed"},{"step":"Integrate with Three.js background", "status":"in_progress"},{"step":"Sanity-check in-node utilities", "status":"pending"}]}
+2026-01-18T18:33:02.195079Z  INFO ToolCall: shell_command {"command":"node -e \"await import('./src/game/app.js'); await import('./src/game/actions.js'); await import('./src/game/content.js'); await import('./src/game/modifiers.js'); await import('./src/game/recipes.js'); await import('./src/game/state.js'); await import('./src/game/store.js');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:33:06.408787Z  INFO ToolCall: shell_command {"command":"node --input-type=module -e \"await import('./src/game/app.js'); await import('./src/game/actions.js'); await import('./src/game/content.js'); await import('./src/game/modifiers.js'); await import('./src/game/recipes.js'); await import('./src/game/state.js'); await import('./src/game/store.js');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:33:08.507829Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"completed"},{"step":"Design state and content data", "status":"completed"},{"step":"Implement simulation and persistence", "status":"completed"},{"step":"Build UI screens and controls", "status":"completed"},{"step":"Integrate with Three.js background", "status":"completed"},{"step":"Sanity-check in-node utilities", "status":"in_progress"}]}
+2026-01-18T18:33:11.007900Z  INFO ToolCall: update_plan {"plan":[{"step":"Read game idea requirements", "status":"completed"},{"step":"Design state and content data", "status":"completed"},{"step":"Implement simulation and persistence", "status":"completed"},{"step":"Build UI screens and controls", "status":"completed"},{"step":"Integrate with Three.js background", "status":"completed"},{"step":"Sanity-check in-node utilities", "status":"completed"}]}
+2026-01-18T18:35:45.351709Z  INFO spawning ghost snapshot task
+2026-01-18T18:35:45.377730Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:35:45.377765Z  INFO ghost commit captured: 0895a9b29106187ab321060d060bb9bb6e8bb729
+2026-01-18T18:35:45.377775Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:36:50.462260Z  INFO ToolCall: shell_command {"command":"rg -n \"pointer-events\" -S .","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:37:02.482602Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: style.css
+@@
+ .webgl
+ {
+     position: fixed;
+     top: 0;
+     left: 0;
+     outline: none;
+-    z-index: 0;
++    z-index: -1;
+ }
+ 
+ #hud {
+     position: fixed;
+     top: 12px;
+     left: 12px;
+     width: min(440px, calc(100vw - 24px));
+     height: calc(100vh - 24px);
+-    z-index: 10;
++    z-index: 1000;
+     pointer-events: auto;
+ }
+ 
+ .hud {
+     height: 100%;
+     overflow: auto;
+     padding: 12px;
+     border-radius: 14px;
+     background: rgba(12, 14, 20, 0.78);
+     border: 1px solid rgba(255, 255, 255, 0.08);
+     backdrop-filter: blur(10px);
+     color: #e9eef6;
++    pointer-events: auto;
+ }
+*** End Patch
+2026-01-18T18:37:03.973785Z  INFO ToolCall: shell_command {"command":"node --input-type=module -e \"import('./src/game/ui.js'); console.log('ui ok');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:39:27.837524Z  INFO spawning ghost snapshot task
+2026-01-18T18:39:27.864355Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:39:27.864387Z  INFO ghost commit captured: d7d7176bd2b2a7030551e984bac14ba3d56c66bc
+2026-01-18T18:39:27.864397Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:39:40.484244Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: index.html
+@@
+   <body>
+-    <canvas class="webgl"></canvas>
+     <div id="hud"></div>
+     <script type="module" src="/main.js"></script>
+   </body>
+ </html>
+*** End Patch
+2026-01-18T18:39:54.462797Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: main.js
+@@
+-import * as THREE from "three";
+ import "./style.css";
+-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+-import firefliesVertexShader from './shaders/fireflies/vertex.glsl'
+-import firefliesFragmentShader from './shaders/fireflies/fragment.glsl'
+ import { createGameApp } from "./src/game/app.js"
+-
+-
+-const debugObject = {};
+-
+-// Canvas
+-const canvas = document.querySelector("canvas.webgl");
+-
+-
+-// Sizes
+-const sizes = {
+-  width: window.innerWidth,
+-  height: window.innerHeight,
+-};
+-
+-// Scene
+-const scene = new THREE.Scene();
+-
+-const geometry = new THREE.BoxGeometry(1, 1, 1);
+-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+-const cube = new THREE.Mesh(geometry, material);
+-cube.position.x = -3
+-scene.add(cube);
+-
+-/**
+- * Fireflies
+- */
+-// Geometry
+-const firefliesGeometry = new THREE.BufferGeometry()
+-const firefliesCount = 30
+-const positionArray = new Float32Array(firefliesCount * 3)
+-const scaleArray = new Float32Array(firefliesCount)
+-
+-for(let i = 0; i < firefliesCount; i++)
+-{
+-    positionArray[i * 3 + 0] = (Math.random() - 0.5) * 4
+-    positionArray[i * 3 + 1] = Math.random() * 1.5
+-    positionArray[i * 3 + 2] = (Math.random() - 0.5) * 4
+-
+-    scaleArray[i] = Math.random()
+-}
+-
+-firefliesGeometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
+-firefliesGeometry.setAttribute('aScale', new THREE.BufferAttribute(scaleArray, 1))
+-
+-// Material
+-const firefliesMaterial = new THREE.ShaderMaterial({
+-    uniforms:
+-    {
+-        uTime: { value: 0 },
+-        uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+-        uSize: { value: 100 }
+-    },
+-    vertexShader: firefliesVertexShader,
+-    fragmentShader: firefliesFragmentShader,
+-    transparent: true,
+-    blending: THREE.AdditiveBlending,
+-    depthWrite: false
+-})
+-
+-// Points
+-const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial)
+-fireflies.position.x = 3
+-scene.add(fireflies)
+-
+-
+-/**
+- * Models
+- */
+-const dracoLoader = new DRACOLoader()
+-dracoLoader.setDecoderPath('/draco/')
+-
+-const gltfLoader = new GLTFLoader()
+-gltfLoader.setDRACOLoader(dracoLoader)
+-
+-let mixer = null
+-gltfLoader.load(
+-    '/models/Fox/glTF/Fox.gltf',
+-    (gltf) =>
+-    {
+-        gltf.scene.scale.set(0.025, 0.025, 0.025)
+-        scene.add(gltf.scene)
+-
+-        // Animation
+-        mixer = new THREE.AnimationMixer(gltf.scene)
+-        const action = mixer.clipAction(gltf.animations[2])
+-        action.play()
+-    }
+-)
+-
+-
+-/**
+- * Lights
+- */
+-const ambientLight = new THREE.AmbientLight(0xffffff, 2.4)
+-scene.add(ambientLight)
+-
+-/**
+- * Camera
+- */
+-const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100)
+-camera.position.z = 10;
+-
+-/**
+- * Sizes
+- */
+-window.addEventListener("resize", () => {
+-  // Update sizes
+-  sizes.width = window.innerWidth;
+-  sizes.height = window.innerHeight;
+-
+-  // Update camera
+-  camera.aspect = sizes.width / sizes.height;
+-  camera.updateProjectionMatrix();
+-
+-  // Update renderer
+-  renderer.setSize(sizes.width, sizes.height);
+-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+-
+-  // Update fireflies
+-  firefliesMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2)
+-});
+-
+-
+-// Controls
+-const controls = new OrbitControls(camera, canvas);
+-controls.enableDamping = true;
+-
+-/**
+- * Renderer
+- */
+-const renderer = new THREE.WebGLRenderer({
+-  canvas: canvas,
+-  antialias: true,
+-});
+-renderer.setSize(sizes.width, sizes.height);
+-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+-
+-debugObject.clearColor = "#201919";
+-renderer.setClearColor(debugObject.clearColor);
+ 
+ // Game UI + simulation
+ const game = createGameApp()
+ 
+-/**
+- * Animate
+- */
+-let previousTime = 0
+-const clock = new THREE.Clock();
+-
+-function animate() {
+-  const elapsedTime = clock.getElapsedTime();
+-
+-  cube.rotation.x += 0.01;
+-  cube.rotation.y += 0.01;
+-
+-  const deltaTime = elapsedTime - previousTime
+-  previousTime = elapsedTime
+-  game.tick(deltaTime)
+-
+-  // Model animation
+-  if(mixer)
+-  {
+-      mixer.update(deltaTime)
+-  }
+-
+-   // Particles animation
+-  firefliesMaterial.uniforms.uTime.value = elapsedTime
+-
+-  // Update controls
+-  controls.update();
+-
+-  // Render
+-  renderer.render(scene, camera);
+-  // Call tick again on the next frame
+-  window.requestAnimationFrame(animate);
+-}
+-animate();
++let last = performance.now()
++function loop(now) {
++  const dt = Math.max(0, (now - last) / 1000)
++  last = now
++  game.tick(dt)
++  window.requestAnimationFrame(loop)
++}
++window.requestAnimationFrame(loop)
+*** End Patch
+2026-01-18T18:39:56.517357Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: style.css
+@@
+ .webgl
+ {
+     position: fixed;
+     top: 0;
+     left: 0;
+     outline: none;
+     z-index: -1;
++    display: none;
+ }
+*** End Patch
+2026-01-18T18:39:59.058769Z  INFO ToolCall: shell_command {"command":"node --input-type=module -e \"await import('./main.js'); console.log('main ok');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:41:56.419620Z  INFO spawning ghost snapshot task
+2026-01-18T18:41:56.455089Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:41:56.455121Z  INFO ghost commit captured: d482402d1d6aaec18bc84906adc2e03814af233e
+2026-01-18T18:41:56.455131Z  INFO ghost snapshot gate marked ready
+2026-01-18T18:42:53.763972Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+ export function createUI({ root, store }) {
+   let scheduled = false
++  let lastRenderAt = 0
++  let deferTimer = null
+ 
+   function scheduleRender() {
+     if (scheduled) return
+     scheduled = true
+     requestAnimationFrame(() => {
+       scheduled = false
+-      render()
++      const now = performance.now()
++      const minIntervalMs = 150
++      const since = now - lastRenderAt
++      if (since < minIntervalMs) {
++        if (deferTimer) return
++        deferTimer = setTimeout(() => {
++          deferTimer = null
++          scheduleRender()
++        }, Math.ceil(minIntervalMs - since))
++        return
++      }
++      lastRenderAt = now
++      render()
+     })
+   }
+@@
+   function render() {
+     const state = store.getState()
++    const hudBefore = root.querySelector(".hud")
++    const scrollTop = hudBefore ? hudBefore.scrollTop : 0
++    const scrollLeft = hudBefore ? hudBefore.scrollLeft : 0
++
++    const active = document.activeElement
++    const wasSaveFocused = active && active.id === "saveBox"
++    const saveValueBefore = wasSaveFocused
++      ? active.value
++      : /** @type {HTMLTextAreaElement | null} */ (root.querySelector("#saveBox"))?.value ?? ""
++    const saveSelStart = wasSaveFocused ? active.selectionStart : null
++    const saveSelEnd = wasSaveFocused ? active.selectionEnd : null
++
+     root.innerHTML = `
+       <div class="hud">
+         <div class="hudTop">
+           <div class="title">Frontier Idle</div>
+           <div class="hudMeta">
+             <span class="pill">Storage: ${formatInt(computeModifiers(state).storageCap)}</span>
+             <span class="pill">Legacy: ${formatInt(state.legacy?.points ?? 0)}</span>
+           </div>
+         </div>
+         ${renderResources(state)}
+         <div class="tabs">${renderTabs(state)}</div>
+         <div class="panel">${renderPanel(state)}</div>
+         <div class="log">
+           <div class="logTitle">Log</div>
+           <div class="logBody">${renderLog(state)}</div>
+         </div>
+       </div>
+     `
++
++    const hudAfter = root.querySelector(".hud")
++    if (hudAfter) {
++      hudAfter.scrollTop = scrollTop
++      hudAfter.scrollLeft = scrollLeft
++    }
++
++    const saveBoxAfter = /** @type {HTMLTextAreaElement | null} */ (root.querySelector("#saveBox"))
++    if (saveBoxAfter) {
++      saveBoxAfter.value = saveValueBefore
++      if (wasSaveFocused) {
++        saveBoxAfter.focus()
++        if (saveSelStart != null && saveSelEnd != null) {
++          try {
++            saveBoxAfter.setSelectionRange(saveSelStart, saveSelEnd)
++          } catch {
++            // ignore
++          }
++        }
++      }
++    }
+   }
+*** End Patch
+2026-01-18T18:42:56.260752Z  INFO ToolCall: shell_command {"command":"node --input-type=module -e \"await import('./src/game/ui.js'); console.log('ui ok');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T18:58:09.547856Z  INFO spawning ghost snapshot task
+2026-01-18T18:58:09.577711Z  INFO ghost snapshot blocking task finished
+2026-01-18T18:58:09.577753Z  INFO ghost commit captured: aa71abb396cf6b27608859b75eab1025f687e75d
+2026-01-18T18:58:09.577768Z  INFO ghost snapshot gate marked ready
+2026-01-18T19:14:22.446488Z  INFO spawning ghost snapshot task
+2026-01-18T19:14:22.475959Z  INFO ghost snapshot blocking task finished
+2026-01-18T19:14:22.475992Z  INFO ghost commit captured: 800d661cad18dc5de2cf646fef4060ffc70cad78
+2026-01-18T19:14:22.476001Z  INFO ghost snapshot gate marked ready
+2026-01-18T19:16:08.251437Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: style.css
+@@
+ html,
+ body
+ {
+     overflow: hidden;
+     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+ }
+@@
+ #hud {
+     position: fixed;
+     top: 12px;
+     left: 12px;
++    bottom: 12px;
+     width: min(440px, calc(100vw - 24px));
+-    height: calc(100vh - 24px);
+     z-index: 1000;
+     pointer-events: auto;
++    overflow-y: auto;
++    -webkit-overflow-scrolling: touch;
++    touch-action: pan-y;
+ }
+ 
+ .hud {
+-    height: 100%;
+-    overflow: auto;
++    min-height: 100%;
+     padding: 12px;
+     border-radius: 14px;
+     background: rgba(12, 14, 20, 0.78);
+     border: 1px solid rgba(255, 255, 255, 0.08);
+     backdrop-filter: blur(10px);
+     color: #e9eef6;
+     pointer-events: auto;
+ }
+@@
+ .tabs {
+     display: grid;
+     grid-template-columns: repeat(5, 1fr);
+     gap: 6px;
+     margin: 10px 0;
+ }
+ 
++.tabs {
++    position: sticky;
++    top: 0;
++    z-index: 5;
++    padding: 8px 0;
++    background: rgba(12, 14, 20, 0.82);
++    backdrop-filter: blur(10px);
++}
++
++.hudTop {
++    position: sticky;
++    top: 0;
++    z-index: 6;
++    padding-top: 2px;
++    padding-bottom: 8px;
++    background: rgba(12, 14, 20, 0.82);
++    backdrop-filter: blur(10px);
++}
++
++.resGrid {
++    margin-top: 10px;
++}
++
++@media (max-width: 520px) {
++    #hud {
++        top: 10px;
++        left: 10px;
++        right: 10px;
++        bottom: 10px;
++        width: auto;
++    }
++
++    .tabs {
++        grid-template-columns: repeat(3, 1fr);
++    }
++}
++
+*** End Patch
+2026-01-18T19:16:19.034094Z  INFO ToolCall: shell_command {"command":"nl -ba style.css | sed -n '1,160p'","workdir":"/home/vibecode/workspace"}
+2026-01-18T19:16:36.973297Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: style.css
+@@
+ .tabs {
+     display: grid;
+     grid-template-columns: repeat(5, 1fr);
+     gap: 6px;
+     margin: 10px 0;
+ }
+-
+-.tabs {
+-    position: sticky;
+-    top: 0;
+-    z-index: 5;
+-    padding: 8px 0;
+-    background: rgba(12, 14, 20, 0.82);
+-    backdrop-filter: blur(10px);
+-}
+-
+-.hudTop {
+-    position: sticky;
+-    top: 0;
+-    z-index: 6;
+-    padding-top: 2px;
+-    padding-bottom: 8px;
+-    background: rgba(12, 14, 20, 0.82);
+-    backdrop-filter: blur(10px);
+-}
+-
+-.resGrid {
+-    margin-top: 10px;
+-}
+@@
+ .resGrid {
+     display: grid;
+     grid-template-columns: repeat(2, 1fr);
+     gap: 8px;
+     margin-top: 10px;
+ }
+*** End Patch
+2026-01-18T19:16:42.174775Z  INFO ToolCall: shell_command {"command":"rg -n \"^\\.tabs\" -n style.css && rg -n \"^\\.resGrid\" style.css && rg -n \"^\\.hudTop\" style.css","workdir":"/home/vibecode/workspace"}
+2026-01-18T19:16:47.435768Z  INFO ToolCall: shell_command {"command":"rg -n \"function render\\(\" src/game/ui.js && nl -ba src/game/ui.js | sed -n '1,120p'","workdir":"/home/vibecode/workspace"}
+2026-01-18T19:16:55.792196Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+ export function createUI({ root, store }) {
+   let scheduled = false
+   let lastRenderAt = 0
+   let deferTimer = null
++  let interactionLockUntil = 0
++
++  function noteInteraction(durationMs = 400) {
++    interactionLockUntil = Math.max(interactionLockUntil, performance.now() + durationMs)
++  }
+ 
+   function scheduleRender() {
+     if (scheduled) return
+     scheduled = true
+     requestAnimationFrame(() => {
+       scheduled = false
+       const now = performance.now()
++      if (now < interactionLockUntil) {
++        if (deferTimer) return
++        deferTimer = setTimeout(() => {
++          deferTimer = null
++          scheduleRender()
++        }, Math.ceil(interactionLockUntil - now))
++        return
++      }
+       const minIntervalMs = 150
+       const since = now - lastRenderAt
+       if (since < minIntervalMs) {
+         if (deferTimer) return
+         deferTimer = setTimeout(() => {
+@@
+   function render() {
+     const state = store.getState()
+-    const hudBefore = root.querySelector(".hud")
+-    const scrollTop = hudBefore ? hudBefore.scrollTop : 0
+-    const scrollLeft = hudBefore ? hudBefore.scrollLeft : 0
++    const scrollTop = root.scrollTop
++    const scrollLeft = root.scrollLeft
+ 
+     const active = document.activeElement
+     const wasSaveFocused = active && active.id === "saveBox"
+     const saveValueBefore = wasSaveFocused
+       ? active.value
+@@
+       </div>
+     `
+ 
+-    const hudAfter = root.querySelector(".hud")
+-    if (hudAfter) {
+-      hudAfter.scrollTop = scrollTop
+-      hudAfter.scrollLeft = scrollLeft
+-    }
++    root.scrollTop = scrollTop
++    root.scrollLeft = scrollLeft
+ 
+     const saveBoxAfter = /** @type {HTMLTextAreaElement | null} */ (root.querySelector("#saveBox"))
+     if (saveBoxAfter) {
+       saveBoxAfter.value = saveValueBefore
+       if (wasSaveFocused) {
+@@
+   root.addEventListener("click", onClick)
++  root.addEventListener("scroll", () => noteInteraction(600), { passive: true })
++  root.addEventListener("touchstart", () => noteInteraction(600), { passive: true })
++  root.addEventListener("touchmove", () => noteInteraction(900), { passive: true })
++  root.addEventListener("wheel", () => noteInteraction(600), { passive: true })
+   const unsub = store.subscribe(scheduleRender)
+   render()
+ 
+   return {
+     destroy() {
+       root.removeEventListener("click", onClick)
+       unsub()
+     },
+   }
+ }
+*** End Patch
+2026-01-18T19:17:05.485548Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+-  root.addEventListener("click", onClick)
+-  root.addEventListener("scroll", () => noteInteraction(600), { passive: true })
+-  root.addEventListener("touchstart", () => noteInteraction(600), { passive: true })
+-  root.addEventListener("touchmove", () => noteInteraction(900), { passive: true })
+-  root.addEventListener("wheel", () => noteInteraction(600), { passive: true })
++  function onScroll() {
++    noteInteraction(600)
++  }
++  function onTouchStart() {
++    noteInteraction(600)
++  }
++  function onTouchMove() {
++    noteInteraction(900)
++  }
++  function onWheel() {
++    noteInteraction(600)
++  }
++
++  root.addEventListener("click", onClick)
++  root.addEventListener("scroll", onScroll, { passive: true })
++  root.addEventListener("touchstart", onTouchStart, { passive: true })
++  root.addEventListener("touchmove", onTouchMove, { passive: true })
++  root.addEventListener("wheel", onWheel, { passive: true })
+   const unsub = store.subscribe(scheduleRender)
+   render()
+ 
+   return {
+     destroy() {
+       root.removeEventListener("click", onClick)
++      root.removeEventListener("scroll", onScroll)
++      root.removeEventListener("touchstart", onTouchStart)
++      root.removeEventListener("touchmove", onTouchMove)
++      root.removeEventListener("wheel", onWheel)
+       unsub()
+     },
+   }
+ }
+*** End Patch
+2026-01-18T19:17:12.645112Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/state.js
+@@
+     expedition: {
+       active: false,
+       seed: 0,
+       risk: 1, // 1..3
+       roomIndex: 0,
+       roomCount: 0,
+       room: null,
+       pendingChoice: null, // { kind, options: [...] }
++      feed: [],
+       stats: {
+         roomsCleared: 0,
+         bossesDefeated: 0,
+       },
+     },
+   }
+ }
+*** End Patch
+2026-01-18T19:17:16.797291Z  INFO ToolCall: shell_command {"command":"nl -ba src/game/expedition.js | sed -n '1,260p'","workdir":"/home/vibecode/workspace"}
+2026-01-18T19:18:10.123460Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/expedition.js
+@@
+ import { mulberry32, randomInt } from "./rng.js"
+ import { computeModifiers } from "./modifiers.js"
+ import { nextLevelProgress } from "./math.js"
+ import { pushLog } from "./log.js"
+ 
++const ENEMIES_BY_TIER = [
++  ["Slime", "Boar", "Wolf", "Giant Rat"],
++  ["Bandit", "Giant Spider", "Skeletal Scout", "Wild Stag"],
++  ["Cultist", "Ogre", "Stone Golem", "Warg"],
++]
++
++const BOSSES = ["Feral Alpha", "Ruin Warden", "Ancient Stag"]
++
+ function addResourceCapped(state, resourceId, amount) {
+   const cap = computeModifiers(state).storageCap
+   const next = (state.resources[resourceId] ?? 0) + amount
+   state.resources[resourceId] = Math.max(0, Math.min(cap, next))
+ }
+ 
++function ensureFeed(state) {
++  const e = state.expedition
++  if (!Array.isArray(e.feed)) e.feed = []
++}
++
++function pushFeed(state, message) {
++  ensureFeed(state)
++  state.expedition.feed.unshift(message)
++  state.expedition.feed.length = Math.min(state.expedition.feed.length, 40)
++}
++
++function rngNextFloat(rng) {
++  // Serializable RNG step (mulberry32 variant)
++  let t = (rng.t ?? 0) >>> 0
++  t = (t + 0x6d2b79f5) >>> 0
++  let x = Math.imul(t ^ (t >>> 15), 1 | t)
++  x ^= x + Math.imul(x ^ (x >>> 7), 61 | x)
++  rng.t = t
++  return ((x ^ (x >>> 14)) >>> 0) / 4294967296
++}
++
++function pickEnemyName(seed, difficulty, isBoss) {
++  const rand = mulberry32((seed ^ 0x9e3779b9) >>> 0)
++  if (isBoss) return BOSSES[randomInt(rand, 0, BOSSES.length)]
++  const tier = Math.max(0, Math.min(ENEMIES_BY_TIER.length - 1, Math.floor((difficulty - 1) / 2)))
++  const list = ENEMIES_BY_TIER[tier]
++  return list[randomInt(rand, 0, list.length)]
++}
++
+ function rollRoomType(rand, roomIndex, roomCount) {
+   if (roomIndex === roomCount - 1) return "boss"
+   const r = rand()
+   if (r < 0.55) return "combat"
+@@
+ function makeRoom(state) {
+   const e = state.expedition
+   const rand = mulberry32(e.seed + e.roomIndex * 1337)
+   const type = rollRoomType(rand, e.roomIndex, e.roomCount)
+   const risk = e.risk
+   const baseDifficulty = 1 + Math.floor((e.roomIndex / Math.max(1, e.roomCount - 1)) * (2 + risk))
+   const difficulty = baseDifficulty + randomInt(rand, 0, 2)
+@@
+   const finalDifficulty = Math.max(1, difficulty + (choiceMod.difficultyAdd ?? 0))
+ 
+-  const durationSec = type === "rest" ? 6 : type === "treasure" ? 3 : type === "event" ? 0 : 8 + 3 * finalDifficulty
++  const durationSec =
++    type === "rest"
++      ? 6
++      : type === "treasure"
++        ? 3
++        : type === "event"
++          ? 0
++          : 1 // combat handled by discrete simulation; duration is derived from HP
++
++  const seed = (e.seed + e.roomIndex * 1337 + (finalDifficulty << 8)) >>> 0
+ 
+   return {
+     type,
+     difficulty: finalDifficulty,
+     durationSec,
+     progressSec: 0,
+     lootMult: choiceMod.lootMult ?? 1,
+     resolved: false,
++    seed,
+   }
+ }
+ 
+ function computePlayerCombat(state) {
+   const mods = computeModifiers(state)
+   const combatLevel = nextLevelProgress(state.skills.combat.xp).level
+@@
+ function applyInjuryIfAny(state, baseChance) {
+   const mods = computeModifiers(state)
+   const chance = baseChance * mods.injuryChanceMult
+   if (Math.random() > chance) return false
+   const now = state.meta?.simTimeMs ?? Date.now()
+   state._injuredUntil = Math.max(state._injuredUntil ?? 0, now + 60_000)
+   pushLog(state, "Injury! Efficiency reduced for 60s.")
+   return true
+ }
+ 
++function ensureCombatRoomInitialized(state, room) {
++  if (room.combat) return
++  const isBoss = room.type === "boss"
++  const { power, toughness, combatLevel } = computePlayerCombat(state)
++
++  const enemyPower = 1 + room.difficulty * (1.2 + 0.35 * state.expedition.risk) + (isBoss ? 4 : 0)
++  const enemyMaxHp = Math.floor(18 + room.difficulty * 14 + (isBoss ? 75 : 0))
++  const playerMaxHp = Math.floor(30 + combatLevel * 8 + (state.equipment.armorTier ?? 0) * 10)
++
++  const playerInterval = Math.max(0.45, Math.min(1.2, 1.15 / (0.75 + power / 6)))
++  const enemyInterval = Math.max(0.6, Math.min(1.5, 1.35 / (0.7 + enemyPower / 7)))
++
++  room.combat = {
++    enemyName: pickEnemyName(room.seed, room.difficulty, isBoss),
++    enemyPower,
++    enemyHp: enemyMaxHp,
++    enemyMaxHp,
++    playerHp: playerMaxHp,
++    playerMaxHp,
++    playerPower: power,
++    playerToughness: toughness,
++    playerInterval,
++    enemyInterval,
++    playerCd: 0.1,
++    enemyCd: 0.7,
++    rng: { t: (room.seed ^ 0xdeadbeef) >>> 0 },
++    damageTaken: 0,
++    started: false,
++  }
++}
++
++function tickCombatRoom(state, room, dtSec) {
++  ensureCombatRoomInitialized(state, room)
++  const c = room.combat
++  if (!c.started) {
++    c.started = true
++    pushFeed(state, `${c.enemyName} appears!`)
++  }
++
++  // Auto-potion at low HP.
++  if ((state.resources.potions ?? 0) > 0 && c.playerHp / c.playerMaxHp < 0.35) {
++    state.resources.potions -= 1
++    const heal = Math.ceil(c.playerMaxHp * 0.35)
++    c.playerHp = Math.min(c.playerMaxHp, c.playerHp + heal)
++    pushFeed(state, `You drink a potion and heal ${heal}.`)
++  }
++
++  c.playerCd -= dtSec
++  c.enemyCd -= dtSec
++
++  let safety = 0
++  while (safety++ < 20) {
++    const next = Math.min(c.playerCd, c.enemyCd)
++    if (next > 0) break
++
++    if (c.playerCd <= c.enemyCd) {
++      // Player attacks
++      c.playerCd += c.playerInterval
++      const r = rngNextFloat(c.rng)
++      const hitChance = Math.max(0.55, Math.min(0.95, 0.72 + (c.playerPower - c.enemyPower) * 0.04))
++      if (r > hitChance) {
++        pushFeed(state, `You miss.`)
++      } else {
++        const dodgeChance = Math.max(0.03, Math.min(0.22, 0.06 + (c.enemyPower - c.playerPower) * 0.02))
++        const r2 = rngNextFloat(c.rng)
++        if (r2 < dodgeChance) {
++          pushFeed(state, `${c.enemyName} dodges.`)
++        } else {
++          const critChance = Math.max(0.04, Math.min(0.18, 0.06 + (c.playerPower - c.enemyPower) * 0.02))
++          const r3 = rngNextFloat(c.rng)
++          const crit = r3 < critChance
++          const base = (0.75 + rngNextFloat(c.rng) * 0.5) * (2 + c.playerPower * 3.0)
++          const dmg = Math.max(1, Math.floor(base * (crit ? 1.6 : 1)))
++          c.enemyHp = Math.max(0, c.enemyHp - dmg)
++          pushFeed(state, `You hit ${c.enemyName} for ${dmg}${crit ? " (crit)" : ""}.`)
++        }
++      }
++    } else {
++      // Enemy attacks
++      c.enemyCd += c.enemyInterval
++      const r = rngNextFloat(c.rng)
++      const dodgeChance = Math.max(0.05, Math.min(0.25, 0.08 + nextLevelProgress(state.skills.combat.xp).level * 0.002))
++      if (r < dodgeChance) {
++        pushFeed(state, `You dodge.`)
++      } else {
++        const base = (0.8 + rngNextFloat(c.rng) * 0.45) * (1 + c.enemyPower * 2.2)
++        const reduced = Math.max(0, Math.floor(base - c.playerToughness * 1.2))
++        const dmg = Math.max(0, reduced)
++        if (dmg <= 0) {
++          pushFeed(state, `${c.enemyName} strikes, but you block it.`)
++        } else {
++          c.playerHp = Math.max(0, c.playerHp - dmg)
++          c.damageTaken += dmg
++          pushFeed(state, `${c.enemyName} hits you for ${dmg}.`)
++        }
++      }
++    }
++
++    if (c.enemyHp <= 0 || c.playerHp <= 0) break
++  }
++
++  if (c.playerHp <= 0) {
++    pushFeed(state, "You are forced to retreat!")
++    applyInjuryIfAny(state, 0.25 + 0.05 * state.expedition.risk)
++    stopExpedition(state)
++    pushLog(state, "You retreated from the expedition.")
++    return
++  }
++
++  if (c.enemyHp > 0) return
++
++  const isBoss = room.type === "boss"
++  const baseXp = (12 + 7 * room.difficulty + (isBoss ? 35 : 0)) * (0.9 + 0.1 * state.expedition.risk)
++  state.skills.combat.xp += baseXp * computeModifiers(state).globalXpMult
++  const loot = awardLoot(state, { difficulty: room.difficulty, isBoss, lootMult: room.lootMult })
++
++  const danger = Math.max(0.1, c.enemyPower / Math.max(0.5, c.playerToughness))
++  const took = c.damageTaken / Math.max(1, c.playerMaxHp)
++  const injuryChance = Math.min(0.42, 0.06 * danger + 0.18 * took + 0.03 * state.expedition.risk + (isBoss ? 0.04 : 0))
++  applyInjuryIfAny(state, injuryChance)
++
++  pushFeed(state, `Defeated ${c.enemyName}.`)
++  pushFeed(state, `Loot: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
++  pushLog(state, `${isBoss ? "Boss defeated" : "Won fight"}: +${Math.floor(baseXp)} combat XP, +${loot.gold} gold.`)
++
++  room.resolved = true
++  if (isBoss) state.expedition.stats.bossesDefeated += 1
++}
++
+ export function startExpedition(state, { risk = 1 }) {
+   const now = Date.now()
+   if ((state.resources.rations ?? 0) > 0) state.resources.rations -= 1
+   else if ((state.resources.meat ?? 0) > 0) state.resources.meat -= 1
+   state.activity.type = "expedition"
+   state.expedition.active = true
+   state.expedition.risk = Math.max(1, Math.min(3, risk))
+   state.expedition.seed = Math.floor(Math.random() * 2 ** 31)
+   state.expedition.roomIndex = 0
+   state.expedition.roomCount = 8 + 2 * state.expedition.risk
+   state.expedition.room = makeRoom(state)
+   state.expedition.pendingChoice = null
++  state.expedition.feed = []
+   state.meta.lastTickAt = now
+   pushLog(state, `Expedition started (Risk ${state.expedition.risk}).`)
++  pushFeed(state, `You head out (Risk ${state.expedition.risk}).`)
+ }
+@@
+ export function stopExpedition(state) {
+   if (!state.expedition.active) return
+   state.expedition.active = false
+   state.expedition.room = null
+   state.expedition.pendingChoice = null
+   state.activity.type = "idle"
+   pushLog(state, "Expedition ended.")
+ }
+@@
+ export function tickExpedition(state, dtSec) {
+   const e = state.expedition
+   if (!e.active) return
+   if (e.pendingChoice) return
+ 
+   if (!e.room) e.room = makeRoom(state)
+   const room = e.room
+-  const isBoss = room.type === "boss"
+ 
+   if (room.type === "event") {
++    if (!room._prompted) {
++      room._prompted = true
++      pushFeed(state, "A fork in the path… choose your route.")
++    }
+     e.pendingChoice = {
+       kind: "route",
+       options: [
+         { id: "safe", name: "Safe path", lootMult: 0.9, difficultyAdd: -1 },
+         { id: "risky", name: "Risky path", lootMult: 1.35, difficultyAdd: +1 },
+       ],
+     }
+     return
+   }
+ 
+   const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
+   const speedMult = injured ? 0.6 : 1
+ 
+   if (room.type === "rest") {
+     room.progressSec += dtSec * speedMult
+     if (room.progressSec >= room.durationSec) {
+       const used = state.resources.rations > 0
+       if (used) state.resources.rations -= 1
+       if (used) pushLog(state, "Rested and used 1 ration.")
+       else pushLog(state, "Rested (no rations).")
++      pushFeed(state, used ? "You rest and eat a ration." : "You rest for a moment.")
+       room.resolved = true
+     }
+   } else if (room.type === "treasure") {
+     room.progressSec += dtSec * speedMult
+     if (room.progressSec >= room.durationSec) {
+       const loot = awardLoot(state, { difficulty: room.difficulty, isBoss: false, lootMult: room.lootMult })
+       pushLog(state, `Found treasure: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
++      pushFeed(state, "You find a hidden cache.")
++      pushFeed(state, `Loot: +${loot.gold} gold${loot.meat ? `, +${loot.meat} meat` : ""}${loot.herbs ? `, +${loot.herbs} herbs` : ""}.`)
+       room.resolved = true
+     }
+-  } else {
+-    // Combat/boss: scale duration by player combat power vs difficulty.
+-    const { power, toughness } = computePlayerCombat(state)
+-    const enemyPower = 1 + room.difficulty * (1.2 + 0.35 * e.risk) + (isBoss ? 4 : 0)
+-    const combatSpeed = Math.max(0.2, power / enemyPower) * speedMult
+-    room.progressSec += dtSec * combatSpeed
+-
+-    if (room.progressSec >= room.durationSec) {
+-      const baseXp = (12 + 7 * room.difficulty + (isBoss ? 35 : 0)) * (0.9 + 0.1 * e.risk)
+-      state.skills.combat.xp += baseXp * computeModifiers(state).globalXpMult
+-      const loot = awardLoot(state, { difficulty: room.difficulty, isBoss, lootMult: room.lootMult })
+-
+-      // Injury chance depends on (enemy vs toughness), risk, and boss.
+-      const danger = Math.max(0.1, enemyPower / Math.max(0.5, toughness))
+-      const injuryChance = Math.min(0.35, 0.08 * danger + 0.04 * e.risk + (isBoss ? 0.05 : 0))
+-      applyInjuryIfAny(state, injuryChance)
+-
+-      pushLog(
+-        state,
+-        `${isBoss ? "Boss defeated" : "Won fight"}: +${Math.floor(baseXp)} combat XP, +${loot.gold} gold.`
+-      )
+-      room.resolved = true
+-      if (isBoss) e.stats.bossesDefeated += 1
+-    }
++  } else if (room.type === "combat" || room.type === "boss") {
++    tickCombatRoom(state, room, dtSec * speedMult)
++    if (!e.active) return // player may have retreated
+   }
+ 
+   if (!room.resolved) return
+ 
+   e.stats.roomsCleared += 1
+   e.roomIndex += 1
+   if (e.roomIndex >= e.roomCount) {
+     stopExpedition(state)
+     pushLog(state, "Expedition complete. Back to town.")
++    pushFeed(state, "Expedition complete. Back to town.")
+     return
+   }
+   e.room = makeRoom(state)
+ }
+*** End Patch
+2026-01-18T19:18:19.694976Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/expedition.js
+@@
+ export function chooseExpeditionOption(state, optionId) {
+   const choice = state.expedition.pendingChoice
+   if (!choice) return
+   const opt = choice.options.find((o) => o.id === optionId)
+   if (!opt) return
+   state.expedition._nextRoomMod = { lootMult: opt.lootMult, difficultyAdd: opt.difficultyAdd }
+   state.expedition.pendingChoice = null
+   pushLog(state, `Chose: ${opt.name}.`)
++  pushFeed(state, `You choose: ${opt.name}.`)
+ 
+   // Resolve the current event room and move on.
+   if (state.expedition.room?.type === "event") {
+     state.expedition.stats.roomsCleared += 1
+     state.expedition.roomIndex += 1
+*** End Patch
+2026-01-18T19:18:23.909138Z  INFO ToolCall: shell_command {"command":"rg -n \"function renderExpedition\" -n src/game/ui.js && nl -ba src/game/ui.js | sed -n '150,310p'","workdir":"/home/vibecode/workspace"}
+2026-01-18T19:18:42.745469Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+ 	  function renderExpedition(state) {
+ 	    const e = state.expedition
+ 	    if (!e.active) {
+@@
+ 	    const room = e.room
+ 	    const roomName =
+ 	      room?.type === "combat"
+ 	        ? "Combat"
+ 	        : room?.type === "boss"
+ 	          ? "Boss"
+@@
+ 	                : "Unknown"
+ 
+-	    const pct = room?.durationSec ? Math.floor((room.progressSec / room.durationSec) * 100) : 0
+-	    const remaining = room?.durationSec ? Math.max(0, room.durationSec - room.progressSec) : 0
++	    const combat = room?.combat
++	    const pct =
++	      room?.type === "combat" || room?.type === "boss"
++	        ? combat?.enemyMaxHp
++	          ? Math.floor((1 - combat.enemyHp / combat.enemyMaxHp) * 100)
++	          : 0
++	        : room?.durationSec
++	          ? Math.floor((room.progressSec / room.durationSec) * 100)
++	          : 0
++	    const remaining =
++	      room?.type === "combat" || room?.type === "boss"
++	        ? 0
++	        : room?.durationSec
++	          ? Math.max(0, room.durationSec - room.progressSec)
++	          : 0
++	    const progressLabel =
++	      room?.type === "combat" || room?.type === "boss"
++	        ? combat
++	          ? `${combat.enemyName}: ${formatInt(combat.enemyHp)} / ${formatInt(combat.enemyMaxHp)} HP · You: ${formatInt(combat.playerHp)} / ${formatInt(combat.playerMaxHp)} HP`
++	          : "Engaged…"
++	        : `${formatSeconds(remaining)} remaining`
++
++	    const feed = Array.isArray(e.feed) ? e.feed : []
++	    const feedUi = `
++	      <div class="card">
++	        <div class="card__title">Live Feed</div>
++	        <div class="logBody">
++	          ${
++	            feed.length
++	              ? feed
++	                  .slice(0, 16)
++	                  .map((l) => `<div class="logLine">${escapeHtml(l)}</div>`)
++	                  .join("")
++	              : `<div class="muted small">Nothing yet.</div>`
++	          }
++	        </div>
++	      </div>
++	    `
+@@
+ 	    return `
+ 	      <div class="stack">
+ 	        ${renderActions(state)}
+ 	        <div class="card">
+ 	          <div class="card__title">On Expedition <span class="muted">Risk ${e.risk}</span></div>
+ 	          <div class="row">
+ 	            <div class="pill">Room ${e.roomIndex + 1} / ${e.roomCount}</div>
+ 	            <div class="pill">${roomName} · Diff ${room?.difficulty ?? "?"}</div>
+ 	            <button class="btn btn--warn" data-action="expedition-stop">Return</button>
+ 	          </div>
+ 	          <div class="bar"><div class="bar__fill" style="width:${Math.max(0, Math.min(100, pct))}%"></div></div>
+-	          <div class="muted small">${formatSeconds(remaining)} remaining</div>
++	          <div class="muted small">${escapeHtml(progressLabel)}</div>
+ 	        </div>
+ 	        ${choiceUi}
++	        ${feedUi}
+ 	        <div class="card">
+ 	          <div class="card__title">Supplies</div>
+ 	          <div class="row">
+ 	            <div class="pill">Rations: ${formatInt(state.resources.rations ?? 0)}</div>
+ 	            <div class="pill">Potions: ${formatInt(state.resources.potions ?? 0)}</div>
+ 	          </div>
+ 	          <div class="muted small">Gear: Weapon T${state.equipment.weaponTier ?? 0} · Armor T${state.equipment.armorTier ?? 0}</div>
+ 	        </div>
+ 	      </div>
+ 	    `
+ 	  }
+*** End Patch
+2026-01-18T19:19:08.596883Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+   return {
+     destroy() {
+       root.removeEventListener("click", onClick)
+       root.removeEventListener("scroll", onScroll)
+       root.removeEventListener("touchstart", onTouchStart)
+       root.removeEventListener("touchmove", onTouchMove)
+       root.removeEventListener("wheel", onWheel)
++      if (deferTimer) {
++        clearTimeout(deferTimer)
++        deferTimer = null
++      }
+       unsub()
+     },
+   }
+ }
+*** End Patch
+2026-01-18T19:19:14.779193Z  INFO ToolCall: shell_command {"command":"node --input-type=module -e \"await import('./src/game/expedition.js'); await import('./src/game/ui.js'); console.log('imports ok');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T19:19:29.081762Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+   function onTouchStart() {
+-    noteInteraction(600)
++    noteInteraction(1400)
+   }
+   function onTouchMove() {
+-    noteInteraction(900)
++    noteInteraction(1700)
+   }
+*** End Patch
+2026-01-18T19:19:40.797716Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: src/game/ui.js
+@@
+   function onWheel() {
+     noteInteraction(600)
+   }
++  function onPointerDown() {
++    noteInteraction(1400)
++  }
++  function onPointerMove() {
++    noteInteraction(1700)
++  }
+ 
+   root.addEventListener("click", onClick)
+   root.addEventListener("scroll", onScroll, { passive: true })
+   root.addEventListener("touchstart", onTouchStart, { passive: true })
+   root.addEventListener("touchmove", onTouchMove, { passive: true })
++  root.addEventListener("pointerdown", onPointerDown, { passive: true })
++  root.addEventListener("pointermove", onPointerMove, { passive: true })
+   root.addEventListener("wheel", onWheel, { passive: true })
+   const unsub = store.subscribe(scheduleRender)
+   render()
+ 
+   return {
+     destroy() {
+       root.removeEventListener("click", onClick)
+       root.removeEventListener("scroll", onScroll)
+       root.removeEventListener("touchstart", onTouchStart)
+       root.removeEventListener("touchmove", onTouchMove)
++      root.removeEventListener("pointerdown", onPointerDown)
++      root.removeEventListener("pointermove", onPointerMove)
+       root.removeEventListener("wheel", onWheel)
+       if (deferTimer) {
+         clearTimeout(deferTimer)
+         deferTimer = null
+       }
+*** End Patch
+2026-01-18T19:19:51.602290Z  INFO ToolCall: shell_command {"command":"node --input-type=module -e \"await import('./src/game/ui.js'); await import('./src/game/expedition.js'); console.log('ok');\"","workdir":"/home/vibecode/workspace"}
+2026-01-18T20:28:07.646533Z  INFO Resuming rollout from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:28:07.656354Z  INFO Resumed rollout with 597 items, conversation ID: Some(ConversationId { uuid: 019bd250-6be6-76c0-9473-a0ef61e316b4 })
+2026-01-18T20:28:07.656399Z  INFO Resumed rollout successfully from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:28:07.668051Z  WARN resuming session with different model: previous=gpt-5.2, current=gpt-5.1-codex-max
+2026-01-18T20:28:29.934583Z  INFO Shutting down Codex instance
+2026-01-18T20:28:31.497457Z  INFO Resuming rollout from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:28:31.505369Z  INFO Resumed rollout with 597 items, conversation ID: Some(ConversationId { uuid: 019bd250-6be6-76c0-9473-a0ef61e316b4 })
+2026-01-18T20:28:31.505384Z  INFO Resumed rollout successfully from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:28:31.508518Z  WARN resuming session with different model: previous=gpt-5.2, current=gpt-5.1-codex-max
+2026-01-18T20:41:58.175426Z  INFO Resuming rollout from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:41:58.183401Z  INFO Resumed rollout with 597 items, conversation ID: Some(ConversationId { uuid: 019bd250-6be6-76c0-9473-a0ef61e316b4 })
+2026-01-18T20:41:58.183419Z  INFO Resumed rollout successfully from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:41:58.186629Z  WARN resuming session with different model: previous=gpt-5.2, current=gpt-5.1-codex-max
+2026-01-18T20:54:01.288184Z  INFO Resuming rollout from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:54:01.296174Z  INFO Resumed rollout with 597 items, conversation ID: Some(ConversationId { uuid: 019bd250-6be6-76c0-9473-a0ef61e316b4 })
+2026-01-18T20:54:01.296190Z  INFO Resumed rollout successfully from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T20:54:01.299363Z  WARN resuming session with different model: previous=gpt-5.2, current=gpt-5.1-codex-max
+2026-01-18T21:05:43.264108Z  INFO Resuming rollout from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T21:05:43.271997Z  INFO Resumed rollout with 597 items, conversation ID: Some(ConversationId { uuid: 019bd250-6be6-76c0-9473-a0ef61e316b4 })
+2026-01-18T21:05:43.272014Z  INFO Resumed rollout successfully from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T21:05:43.275136Z  WARN resuming session with different model: previous=gpt-5.2, current=gpt-5.1-codex-max
+2026-01-18T21:37:31.812887Z  INFO Resuming rollout from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T21:37:31.820815Z  INFO Resumed rollout with 597 items, conversation ID: Some(ConversationId { uuid: 019bd250-6be6-76c0-9473-a0ef61e316b4 })
+2026-01-18T21:37:31.820833Z  INFO Resumed rollout successfully from "/home/vibecode/.codex/sessions/2026/01/18/rollout-2026-01-18T18-14-04-019bd250-6be6-76c0-9473-a0ef61e316b4.jsonl"
+2026-01-18T21:37:31.823972Z  WARN resuming session with different model: previous=gpt-5.2, current=gpt-5.1-codex-max
+2026-01-18T21:47:21.431965Z  INFO spawning ghost snapshot task
+2026-01-18T21:47:21.474643Z  INFO ghost snapshot blocking task finished
+2026-01-18T21:47:21.474689Z  INFO ghost commit captured: bf96a13732c8aa1249b22e7277198956ad191f60
+2026-01-18T21:47:21.474703Z  INFO ghost snapshot gate marked ready
+2026-01-18T21:47:30.914157Z  INFO ToolCall: shell_command {"command":"rm -rf shaders public/draco public/models"}
+2026-01-18T21:47:33.244583Z  INFO ToolCall: shell_command {"command":"apply_patch <<'PATCH'\n*** Begin Patch\n*** Update File: style.css\n@@\n-.webgl\n-{\n-    position: fixed;\n-    top: 0;\n-    left: 0;\n-    outline: none;\n-    z-index: -1;\n-    display: none;\n-}\n-\n #hud {\n*** End Patch\nPATCH"}
+2026-01-18T21:47:34.864596Z  INFO ToolCall: shell_command {"command":"nl -ba style.css | sed -n '1,80p'","workdir":"/home/vibecode/workspace"}
+2026-01-18T21:47:38.713127Z  INFO ToolCall: shell_command {"command":"apply_patch <<'PATCH'\n*** Begin Patch\n*** Update File: index.html\n@@\n-    <script type=\"module\" src=\"/main.js\"></script>\n+    <script type=\"module\" src=\"/main.js\"></script>\n   </body>\n </html>\n*** End Patch\nPATCH","workdir":"/home/vibecode/workspace"}
+2026-01-18T21:47:42.950058Z  INFO ToolCall: shell_command {"command":"cat package.json","workdir":"/home/vibecode/workspace"}
+2026-01-18T21:47:44.994462Z  INFO ToolCall: shell_command {"command":"cat main.js","workdir":"/home/vibecode/workspace"}
+2026-01-18T21:47:50.191538Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: package.json
+@@
+   "scripts": {
+     "dev": "vite",
+     "build": "vite build",
+     "preview": "vite preview"
+   },
+   "devDependencies": {
+-    "vite": "^5.2.0",
+-    "vite-plugin-glsl": "^1.3.0"
++    "vite": "^5.2.0"
+   },
+-  "dependencies": {
+-    "@rollup/pluginutils": "^5.3.0",
+-    "three": "^0.166.1",
+-    "vite-plugin-restart": "^0.4.1"
+-  },
++  "dependencies": {},
+   "keywords": [
+-    "three.js",
+-    "boilerplate",
+-    "starter",
+-    "webgl",
+-    "3D",
+-    "graphics",
+-    "node.js",
+-    "npm"
++    "idle",
++    "rpg",
++    "browser",
++    "vite"
+   ]
+ }
+*** End Patch
+2026-01-18T21:47:52.693736Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: vite.config.js
+@@
+-import { defineConfig } from 'vite'
+-import restart from 'vite-plugin-restart'
+-import glsl from 'vite-plugin-glsl'
++import { defineConfig } from 'vite'
+ 
+ export default defineConfig({
+   root: './',
+   publicDir: './public/',
+   base: './',
+   server: {
+     host: true, // accessible sur le réseau local
+     open: !('SANDBOX_URL' in process.env || 'CODESANDBOX_HOST' in process.env)
+   },
+   build: {
+     outDir: 'dist', // doit pointer vers un dossier local (pas ../dist)
+     emptyOutDir: true,
+     sourcemap: true
+   },
+-  plugins: [
+-    restart({ restart: ['public/**'] }),
+-    glsl()
+-  ]
++  plugins: []
+ })
+*** End Patch
+2026-01-18T21:47:56.747240Z  INFO ToolCall: shell_command {"command":"rm -f bun.lock"}
+2026-01-18T21:48:01.250420Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: README.md
+@@
+-# three-boilerplate
+-
+-Welcome to the **three-boilerplatee** README! This document provides an overview of the project, setup instructions, usage examples, and more.
+-
+-
+-## Installation
+-
+-Find the package 'three-boilerplate' in nodemodules folder. \
+-Put it in root folder delete all except the package. 
+-
+-Then, cd three-boilerplate 
+-
+-npm install 
+-
+-npm run dev. 
+-
+-Three-boilerplate in root directory soon.
++# Frontier Idle (Town + Expeditions)
++
++Stripped-down browser idle RPG: gather → build town → craft → expeditions → prestige. No 3D/WebGL code remaining; pure DOM + Vite.
++
++## Run locally
++```bash
++npm install
++npm run dev   # do NOT run here if your platform auto-runs the dev server
++```
++
++## Build for hosting
++```bash
++npm run build
++```
++Upload the `dist/` folder to any static host (Netlify, Vercel, CF Pages, S3/CloudFront, GitHub Pages, etc.).
++
++## Open in VS Code / Claude
++- The app is plain JS/DOM; entry is `main.js`, game logic in `src/game/`.
++- No extra build steps beyond Vite.
++
++## Project layout
++- `index.html` — mounts the HUD (`#hud`).
++- `main.js` — boot loop + game tick.
++- `src/game/` — state, simulation, expeditions, town/buildings, UI rendering.
++- `style.css` — HUD styling (mobile-friendly scrolling).
++
++## Notes
++- No Three.js or shader assets remain.
++- If you cloned earlier, delete `node_modules/` and reinstall to drop unused deps.
+*** End Patch
+2026-01-18T21:48:03.924247Z  INFO ToolCall: shell_command {"command":"rg -n \"three\" -S .","workdir":"/home/vibecode/workspace"}
+2026-01-18T21:48:06.901116Z  INFO ToolCall: apply_patch *** Begin Patch
+*** Update File: package.json
+@@
+-  "name": "three-boilerplate",
++  "name": "frontier-idle",
+*** End Patch
