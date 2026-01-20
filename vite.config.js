@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true, // accessible sur le réseau local
     open: !('SANDBOX_URL' in process.env || 'CODESANDBOX_HOST' in process.env),
-    allowedHosts: 'frontier-idle.onrender.com'
+    allowedHosts: true
   },
   build: {
     outDir: 'dist', // doit pointer vers un dossier local (pas ../dist)
