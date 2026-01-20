@@ -1,3 +1,5 @@
+import { BARS, ITEMS, ORES } from "./items.js"
+
 export const SKILLS = /** @type {const} */ ({
   woodcutting: {
     id: "woodcutting",
@@ -11,7 +13,7 @@ export const SKILLS = /** @type {const} */ ({
     name: "Mining",
     baseXpPerSecond: 3,
     baseYieldPerSecond: 0.8,
-    yields: { ore: 1 },
+    yields: { dullstoneOre: 1 },
   },
   smithing: {
     id: "smithing",
@@ -31,16 +33,30 @@ export const SKILLS = /** @type {const} */ ({
   },
 })
 
-export const RESOURCES = /** @type {const} */ ({
-  wood: { id: "wood", name: "Wood" },
-  ore: { id: "ore", name: "Ore" },
-  bars: { id: "bars", name: "Bars" },
-  herbs: { id: "herbs", name: "Herbs" },
-  potions: { id: "potions", name: "Potions" },
-  meat: { id: "meat", name: "Raw Meat" },
-  rations: { id: "rations", name: "Rations" },
-  gold: { id: "gold", name: "Gold" },
-})
+const BASE_RESOURCES = {
+  wood: { id: "wood", name: "Wood", showInHud: true, category: "material" },
+  herbs: { id: "herbs", name: "Herbs", showInHud: true, category: "material" },
+  potions: { id: "potions", name: "Potions", showInHud: true, category: "consumable" },
+  meat: { id: "meat", name: "Raw Meat", showInHud: true, category: "material" },
+  rations: { id: "rations", name: "Rations", showInHud: true, category: "consumable" },
+  gold: { id: "gold", name: "Gold", showInHud: true, category: "currency" },
+}
+
+function buildResourceCatalog() {
+  const catalog = { ...BASE_RESOURCES }
+  for (const ore of Object.values(ORES)) {
+    catalog[ore.id] = { id: ore.id, name: ore.name, showInHud: true, category: "ore" }
+  }
+  for (const bar of Object.values(BARS)) {
+    catalog[bar.id] = { id: bar.id, name: bar.name, showInHud: true, category: "bar" }
+  }
+  for (const item of Object.values(ITEMS)) {
+    catalog[item.id] = { id: item.id, name: item.name, showInHud: false, category: "gear" }
+  }
+  return catalog
+}
+
+export const RESOURCES = /** @type {const} */ (buildResourceCatalog())
 
 export const BUILDINGS = /** @type {const} */ ({
   campfire: {
@@ -54,14 +70,14 @@ export const BUILDINGS = /** @type {const} */ ({
     id: "workshop",
     name: "Workshop",
     desc: "Improves gathering efficiency.",
-    baseCost: { wood: 60, ore: 20 },
+    baseCost: { wood: 60, dullstoneOre: 20 },
     costScale: 1.6,
   },
   forge: {
     id: "forge",
     name: "Forge",
     desc: "Unlocks smelting and simple gear.",
-    baseCost: { wood: 40, ore: 60 },
+    baseCost: { wood: 40, dullstoneOre: 60 },
     costScale: 1.7,
   },
   alchemistHut: {
@@ -75,14 +91,14 @@ export const BUILDINGS = /** @type {const} */ ({
     id: "barracks",
     name: "Barracks",
     desc: "Improves combat power.",
-    baseCost: { wood: 80, bars: 20 },
+    baseCost: { wood: 80, dullflickBar: 20 },
     costScale: 1.8,
   },
   storehouse: {
     id: "storehouse",
     name: "Storehouse",
     desc: "Increases storage capacity.",
-    baseCost: { wood: 120, ore: 30 },
+    baseCost: { wood: 120, dullstoneOre: 30 },
     costScale: 1.65,
   },
   scoutLodge: {
@@ -96,7 +112,7 @@ export const BUILDINGS = /** @type {const} */ ({
     id: "townHall",
     name: "Town Hall",
     desc: "Unlocks founding a new settlement (prestige).",
-    baseCost: { wood: 200, bars: 50, gold: 200 },
+    baseCost: { wood: 200, dullflickBar: 50, gold: 200 },
     costScale: 2.0,
   },
 })
@@ -112,4 +128,3 @@ export function listBuildingIds() {
 export function listResourceIds() {
   return /** @type {Array<keyof typeof RESOURCES>} */ (Object.keys(RESOURCES))
 }
-

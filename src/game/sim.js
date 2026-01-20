@@ -1,4 +1,5 @@
 import { SKILLS } from "./content.js"
+import { ITEMS, MINING_NODES, toolPerksForTier, maxDurabilityForItem } from "./items.js"
 import { canAfford, payCost } from "./math.js"
 import { computeModifiers } from "./modifiers.js"
 import { pushLog } from "./log.js"
@@ -19,6 +20,18 @@ function addXp(state, skillId, amount) {
   state.skills[skillId].xp += amount
 }
 
+function applyDurabilityLoss(state, slot, amount) {
+  const eq = state.equipment[slot]
+  if (!eq?.id) return
+  const maxDurability = maxDurabilityForItem(eq.id)
+  const before = eq.durability ?? maxDurability
+  const next = Math.max(0, before - amount)
+  eq.durability = next
+  if (before > 0 && next <= 0) {
+    pushLog(state, `Broken ${ITEMS[eq.id]?.name ?? "item"}.`)
+  }
+}
+
 function tickGather(state, dtSec) {
   const skillId = state.activity.gatherSkill
   const skill = SKILLS[skillId]
@@ -27,6 +40,55 @@ function tickGather(state, dtSec) {
   const mods = computeModifiers(state)
   const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
   const eff = injured ? 0.6 : 1
+
+  if (skillId === "mining") {
+    const targetId = state.activity.gatherResource ?? MINING_NODES[0]?.id
+    const node = MINING_NODES.find((entry) => entry.id === targetId)
+    if (!node) return
+    const pickaxe = state.equipment.pickaxe
+    const toolTier = ITEMS[pickaxe?.id]?.tier ?? 0
+    const maxDurability = pickaxe?.id ? maxDurabilityForItem(pickaxe.id) : 0
+    const brokenMult = pickaxe?.id && (pickaxe.durability ?? maxDurability) <= 0 ? 0.5 : 1
+    const rawPerks = toolPerksForTier(toolTier)
+    const perks = {
+      gatherSpeedBonus: rawPerks.gatherSpeedBonus * brokenMult,
+      noDurabilityChance: rawPerks.noDurabilityChance * brokenMult,
+      doubleResourceChance: rawPerks.doubleResourceChance * brokenMult,
+    }
+    let yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
+    yieldPerSec *= 1 + perks.gatherSpeedBonus
+    const yieldMult = 1 + perks.doubleResourceChance
+    const finalYield = yieldPerSec * yieldMult * dtSec
+    addResource(state, node.id, finalYield)
+    const xpPerSec = node.xp * yieldPerSec * mods.gatherXpMult
+    addXp(state, skillId, xpPerSec * dtSec)
+    const durabilityLoss = yieldPerSec * dtSec * (1 - perks.noDurabilityChance)
+    applyDurabilityLoss(state, "pickaxe", durabilityLoss)
+    return
+  }
+
+  if (skillId === "woodcutting") {
+    const axe = state.equipment.axe
+    const toolTier = ITEMS[axe?.id]?.tier ?? 0
+    const maxDurability = axe?.id ? maxDurabilityForItem(axe.id) : 0
+    const brokenMult = axe?.id && (axe.durability ?? maxDurability) <= 0 ? 0.5 : 1
+    const rawPerks = toolPerksForTier(toolTier)
+    const perks = {
+      gatherSpeedBonus: rawPerks.gatherSpeedBonus * brokenMult,
+      noDurabilityChance: rawPerks.noDurabilityChance * brokenMult,
+      doubleResourceChance: rawPerks.doubleResourceChance * brokenMult,
+    }
+    let yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
+    yieldPerSec *= 1 + perks.gatherSpeedBonus
+    const yieldMult = 1 + perks.doubleResourceChance
+    const finalYield = yieldPerSec * yieldMult * dtSec
+    addResource(state, "wood", finalYield)
+    const xpPerSec = (skill.baseXpPerSecond ?? 0) * mods.gatherXpMult * eff * (1 + perks.gatherSpeedBonus)
+    addXp(state, skillId, xpPerSec * dtSec)
+    const durabilityLoss = yieldPerSec * dtSec * (1 - perks.noDurabilityChance)
+    applyDurabilityLoss(state, "axe", durabilityLoss)
+    return
+  }
 
   const yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
   const xpPerSec = (skill.baseXpPerSecond ?? 0) * mods.gatherXpMult * eff
@@ -85,14 +147,6 @@ function tickCraft(state, dtSec) {
       addResource(state, rid, amt)
     }
     addXp(state, recipe.skill, recipe.xp * mods.globalXpMult)
-
-    if (recipe.special === "weapon") {
-      state.equipment.weaponTier = Math.min(10, (state.equipment.weaponTier ?? 0) + 1)
-      pushLog(state, `Crafted weapon tier ${state.equipment.weaponTier}.`)
-    } else if (recipe.special === "armor") {
-      state.equipment.armorTier = Math.min(10, (state.equipment.armorTier ?? 0) + 1)
-      pushLog(state, `Crafted armor tier ${state.equipment.armorTier}.`)
-    }
   }
 }
 
@@ -114,7 +168,7 @@ export function tickSimulation(state, dtSec) {
   const workshopLvl = state.buildings.workshop?.level ?? 0
   if (workshopLvl > 0) {
     addResource(state, "wood", dt * 0.08 * workshopLvl)
-    addResource(state, "ore", dt * 0.06 * workshopLvl)
+    addResource(state, "dullstoneOre", dt * 0.06 * workshopLvl)
   }
 }
 

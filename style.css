@@ -178,11 +178,22 @@ body
     margin-top: 8px;
 }
 
+.invGrid--gear {
+    grid-template-columns: 1fr;
+}
+
 .invItem {
     padding: 10px;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.invItem--gear {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .invItem__name {
@@ -231,6 +242,23 @@ body
     margin-top: 8px;
 }
 
+.recipeRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recipeRow__name {
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .btn {
     padding: 8px 10px;
     border-radius: 10px;
@@ -239,6 +267,26 @@ body
     color: inherit;
     cursor: pointer;
     font-size: 12px;
+}
+
+.btn--small {
+    padding: 6px 8px;
+    font-size: 11px;
+}
+
+.btn--tiny {
+    padding: 4px 6px;
+    font-size: 10px;
+}
+
+.btn--tier {
+    padding: 6px 8px;
+    font-size: 11px;
+}
+
+.btn--tier-active {
+    background: rgba(86, 142, 255, 0.22);
+    border-color: rgba(86, 142, 255, 0.45);
 }
 
 .btn:disabled {
@@ -300,4 +348,48 @@ body
     resize: vertical;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 12px;
+}
+
+.equipGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+@media (max-width: 520px) {
+    .equipGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.equipSlot {
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.equipSlot--empty {
+    opacity: 0.65;
+}
+
+.equipSlot__label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(233, 238, 246, 0.6);
+}
+
+.equipSlot__name {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.equipSlot__actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
 }

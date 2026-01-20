@@ -1,14 +1,18 @@
 import { BUILDINGS, RESOURCES, SKILLS } from "./content.js"
+import { EQUIPMENT_SLOTS, ITEMS, MINING_NODES, TIER_DATA, maxDurabilityForItem, toolPerksForTier } from "./items.js"
 import { nextLevelProgress } from "./math.js"
 import { formatInt, formatNumber, formatSeconds } from "./format.js"
 import {
   buildingNextCost,
   buyLegacyUpgrade,
+  equipItem,
   foundNewSettlement,
+  repairItem,
   setActivityIdle,
   setTab,
   startCraft,
   startGather,
+  unequipItem,
   upgradeBuilding,
 } from "./actions.js"
 import { chooseExpeditionOption, startExpedition, stopExpedition } from "./expedition.js"
@@ -30,11 +34,22 @@ function renderCost(cost) {
     const name = RESOURCES[rid]?.name ?? rid
     parts.push(`${escapeHtml(name)}: ${formatInt(amt)}`)
   }
-  return parts.join(" · ")
+  return parts.join(" | ")
 }
 
 function isInjured(state) {
   return (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
+}
+
+const SLOT_LABELS = {
+  weapon: "Weapon",
+  head: "Head",
+  chest: "Chest",
+  legs: "Legs",
+  boots: "Boots",
+  shield: "Shield",
+  pickaxe: "Pickaxe",
+  axe: "Axe",
 }
 
 export function createUI({ root, store }) {
@@ -78,30 +93,19 @@ export function createUI({ root, store }) {
     })
   }
 
-  function renderResources(state) {
-    const cap = computeModifiers(state).storageCap
-    const rows = Object.keys(RESOURCES)
-      .map((rid) => {
-        const r = RESOURCES[rid]
-        const v = state.resources[rid] ?? 0
-        const c = rid === "gold" ? "res res--gold" : "res"
-        return `<div class="${c}"><div class="res__name">${escapeHtml(r.name)}</div><div class="res__val">${formatInt(v)} <span class="muted">/ ${formatInt(cap)}</span></div></div>`
-      })
-      .join("")
-    return `<div class="resGrid">${rows}</div>`
-  }
-
-  function renderActions(state) {
-    const forge = state.buildings.forge?.level ?? 0
-    const camp = state.buildings.campfire?.level ?? 0
-    const alc = state.buildings.alchemistHut?.level ?? 0
-
+  function renderActivitySummary(state) {
     const activity = state.activity.type
+    const gatherTarget =
+      state.activity.gatherSkill === "mining"
+        ? MINING_NODES.find((node) => node.id === state.activity.gatherResource)?.name
+        : null
     const activeLabel =
       activity === "idle"
         ? "Idle"
         : activity === "gather"
-          ? `Gathering (${SKILLS[state.activity.gatherSkill]?.name ?? state.activity.gatherSkill})`
+          ? `Gathering (${SKILLS[state.activity.gatherSkill]?.name ?? state.activity.gatherSkill}${
+              gatherTarget ? `: ${gatherTarget}` : ""
+            })`
           : activity === "craft"
             ? `Crafting (${RECIPES[state.activity.craft?.recipeId]?.name ?? "?"})`
             : activity === "expedition"
@@ -110,24 +114,139 @@ export function createUI({ root, store }) {
 
     return `
       <div class="card">
-        <div class="card__title">Actions</div>
+        <div class="card__title">Activity</div>
         <div class="row">
           <div class="pill">${escapeHtml(activeLabel)}${isInjured(state) ? ' <span class="bad">Injured</span>' : ""}</div>
           <button class="btn" data-action="activity-idle">Idle</button>
         </div>
+      </div>
+    `
+  }
+
+  function renderSkillSelector(state) {
+    const selected = state.ui.selectedSkill ?? "woodcutting"
+    const skills = ["woodcutting", "mining", "smithing", "cooking", "alchemy"]
+    const rows = skills
+      .map((sid) => {
+        const active = selected === sid ? "btn btn--tier btn--tier-active" : "btn btn--tier"
+        return `<button class="${active}" data-action="select-skill" data-skill="${escapeHtml(
+          sid
+        )}">${escapeHtml(SKILLS[sid]?.name ?? sid)}</button>`
+      })
+      .join("")
+    return `
+      <div class="card">
+        <div class="card__title">Choose Skill</div>
+        <div class="row">${rows}</div>
+      </div>
+    `
+  }
+
+  function renderMiningTargets(state) {
+    const miningLevel = nextLevelProgress(state.skills.mining?.xp ?? 0).level
+    const unlocked = MINING_NODES.filter((node) => node.level <= miningLevel)
+    if (unlocked.length === 0) {
+      return `<div class="muted small">No ores unlocked yet.</div>`
+    }
+    return `
+      <div class="card">
+        <div class="card__title">Mining Targets</div>
         <div class="row">
-          <button class="btn" data-action="activity-gather" data-skill="woodcutting">Woodcut</button>
-          <button class="btn" data-action="activity-gather" data-skill="mining">Mine</button>
+          ${unlocked
+            .map(
+              (node) =>
+                `<button class="btn" data-action="activity-gather" data-skill="mining" data-resource="${escapeHtml(
+                  node.id
+                )}">Mine ${escapeHtml(node.name)}</button>`
+            )
+            .join("")}
         </div>
-        <div class="row">
-          <button class="btn" data-action="activity-craft" data-recipe="smeltBars" ${forge <= 0 ? "disabled" : ""}>Smelt Bars</button>
-          <button class="btn" data-action="activity-craft" data-recipe="craftWeapon" ${forge <= 0 ? "disabled" : ""}>Weapon +1</button>
-          <button class="btn" data-action="activity-craft" data-recipe="craftArmor" ${forge <= 0 ? "disabled" : ""}>Armor +1</button>
-        </div>
-        <div class="row">
-          <button class="btn" data-action="activity-craft" data-recipe="cookRations" ${camp <= 0 ? "disabled" : ""}>Cook Rations</button>
-          <button class="btn" data-action="activity-craft" data-recipe="brewPotions" ${alc <= 0 ? "disabled" : ""}>Brew Potions</button>
-        </div>
+      </div>
+    `
+  }
+
+  function renderCraftingList(state, skillId) {
+    const skillLevel = nextLevelProgress(state.skills[skillId]?.xp ?? 0).level
+    const buildingId =
+      skillId === "cooking" ? "campfire" : skillId === "alchemy" ? "alchemistHut" : null
+    const buildingLevel = buildingId ? state.buildings[buildingId]?.level ?? 0 : 1
+    const recipes = Object.values(RECIPES).filter((recipe) => recipe.skill === skillId)
+
+    const rows = recipes
+      .map((recipe) => {
+        const canUse = buildingLevel > 0 && skillLevel >= (recipe.requiresLevel ?? 1)
+        return `
+          <div class="recipeRow">
+            <div>
+              <div class="recipeRow__name">${escapeHtml(recipe.name)}</div>
+              <div class="muted small">Req: ${escapeHtml(SKILLS[skillId]?.name ?? skillId)} ${
+                recipe.requiresLevel ?? 1
+              } | Cost: ${renderCost(recipe.in ?? {})} | XP: ${formatInt(recipe.xp ?? 0)}</div>
+            </div>
+            <button class="btn" data-action="activity-craft" data-recipe="${escapeHtml(recipe.id)}" ${
+              canUse ? "" : "disabled"
+            }>Craft</button>
+          </div>
+        `
+      })
+      .join("")
+
+    return `
+      <div class="card">
+        <div class="card__title">${escapeHtml(SKILLS[skillId]?.name ?? skillId)}</div>
+        ${rows || `<div class="muted small">No recipes unlocked yet.</div>`}
+      </div>
+    `
+  }
+
+  function renderSmithing(state) {
+    const smithingLevel = nextLevelProgress(state.skills.smithing?.xp ?? 0).level
+    const selectedTier = Math.min(
+      Math.max(1, state.ui.smithingTier ?? 1),
+      Math.max(1, Math.max(...TIER_DATA.map((t) => t.tier)))
+    )
+    const forge = state.buildings.forge?.level ?? 0
+
+    const tierButtons = TIER_DATA.map((tier) => {
+      const unlocked = smithingLevel >= (tier.bar?.level ?? tier.tier)
+      const active = selectedTier === tier.tier
+      const cls = active ? "btn btn--tier btn--tier-active" : "btn btn--tier"
+      return `<button class="${cls}" data-action="smithing-tier" data-tier="${tier.tier}" ${unlocked ? "" : "disabled"}>T${tier.tier}</button>`
+    }).join("")
+
+    const recipes = Object.values(RECIPES)
+      .filter((recipe) => recipe.skill === "smithing" && recipe.tier === selectedTier)
+      .sort((a, b) => {
+        const aCat = a.category === "smelt" ? 0 : 1
+        const bCat = b.category === "smelt" ? 0 : 1
+        if (aCat !== bCat) return aCat - bCat
+        return (a.requiresLevel ?? 0) - (b.requiresLevel ?? 0)
+      })
+
+    const rows = recipes
+      .map((recipe) => {
+        const canUse = forge > 0 && smithingLevel >= (recipe.requiresLevel ?? 1)
+        return `
+          <div class="recipeRow">
+            <div>
+              <div class="recipeRow__name">${escapeHtml(recipe.name)}</div>
+              <div class="muted small">Req: Smithing ${recipe.requiresLevel ?? 1} | Cost: ${renderCost(
+                recipe.in ?? {}
+              )} | XP: ${formatInt(recipe.xp ?? 0)}</div>
+            </div>
+            <button class="btn" data-action="activity-craft" data-recipe="${escapeHtml(recipe.id)}" ${
+              canUse ? "" : "disabled"
+            }>Forge</button>
+          </div>
+        `
+      })
+      .join("")
+
+    return `
+      <div class="card">
+        <div class="card__title">Smithing</div>
+        <div class="row">${tierButtons}</div>
+        ${rows || `<div class="muted small">No smithing recipes unlocked for this tier.</div>`}
       </div>
     `
   }
@@ -150,7 +269,7 @@ export function createUI({ root, store }) {
         `
       })
       .join("")
-    return `<div class="stack">${renderActions(state)}${cards}</div>`
+    return `<div class="stack">${cards}</div>`
   }
 
   function renderSkills(state) {
@@ -169,7 +288,22 @@ export function createUI({ root, store }) {
         `
       })
       .join("")
-    return `<div class="stack">${renderActions(state)}${skills}</div>`
+
+    const selected = state.ui.selectedSkill ?? "woodcutting"
+    let skillPanel = ""
+    if (selected === "woodcutting") {
+      skillPanel = `<div class="card"><div class="card__title">Woodcutting</div><div class="muted small">Selecting Woodcutting starts gathering wood.</div></div>`
+    } else if (selected === "mining") {
+      skillPanel = renderMiningTargets(state)
+    } else if (selected === "smithing") {
+      skillPanel = renderSmithing(state)
+    } else if (selected === "cooking") {
+      skillPanel = renderCraftingList(state, "cooking")
+    } else if (selected === "alchemy") {
+      skillPanel = renderCraftingList(state, "alchemy")
+    }
+
+    return `<div class="stack">${renderActivitySummary(state)}${renderSkillSelector(state)}${skillPanel}${skills}</div>`
   }
 
 	  function renderExpedition(state) {
@@ -178,7 +312,7 @@ export function createUI({ root, store }) {
       const canStart = (state.resources.rations ?? 0) > 0 || (state.resources.meat ?? 0) > 0
       return `
         <div class="stack">
-          ${renderActions(state)}
+          ${renderActivitySummary(state)}
           <div class="card">
             <div class="card__title">Expeditions</div>
             <div class="muted">Prep in town, then explore room-by-room. Boss is always the last room.</div>
@@ -208,6 +342,7 @@ export function createUI({ root, store }) {
 	                : "Unknown"
 
 	    const combat = room?.combat
+      const playerCombat = computePlayerCombat(state)
 	    const pct =
 	      room?.type === "combat" || room?.type === "boss"
 	        ? combat?.enemyMaxHp
@@ -225,7 +360,7 @@ export function createUI({ root, store }) {
 	    const progressLabel =
 	      room?.type === "combat" || room?.type === "boss"
 	        ? combat
-	          ? `${combat.enemyName}: ${formatInt(combat.enemyHp)} / ${formatInt(combat.enemyMaxHp)} HP · You: ${formatInt(combat.playerHp)} / ${formatInt(combat.playerMaxHp)} HP`
+	          ? `${combat.enemyName}: ${formatInt(combat.enemyHp)} / ${formatInt(combat.enemyMaxHp)} HP | You: ${formatInt(combat.playerHp)} / ${formatInt(combat.playerMaxHp)} HP`
 	          : "Engaged…"
 	        : `${formatSeconds(remaining)} remaining`
 
@@ -266,12 +401,11 @@ export function createUI({ root, store }) {
 
 	    return `
 	      <div class="stack">
-	        ${renderActions(state)}
 	        <div class="card">
 	          <div class="card__title">On Expedition <span class="muted">Risk ${e.risk}</span></div>
 	          <div class="row">
 	            <div class="pill">Room ${e.roomIndex + 1} / ${e.roomCount}</div>
-	            <div class="pill">${roomName} · Diff ${room?.difficulty ?? "?"}</div>
+	            <div class="pill">${roomName} | Diff ${room?.difficulty ?? "?"}</div>
 	            <button class="btn btn--warn" data-action="expedition-stop">Return</button>
 	          </div>
 	          <div class="bar"><div class="bar__fill" style="width:${Math.max(0, Math.min(100, pct))}%"></div></div>
@@ -282,13 +416,17 @@ export function createUI({ root, store }) {
 	        <div class="card">
 	          <div class="card__title">Supplies</div>
 	          <div class="row">
+	            <div class="pill">Meat: ${formatInt(state.resources.meat ?? 0)}</div>
 	            <div class="pill">Rations: ${formatInt(state.resources.rations ?? 0)}</div>
 	            <div class="pill">Potions: ${formatInt(state.resources.potions ?? 0)}</div>
 	          </div>
-	          <div class="muted small">Gear: Weapon T${state.equipment.weaponTier ?? 0} · Armor T${state.equipment.armorTier ?? 0}</div>
-	        </div>
-	      </div>
-	    `
+          <div class="muted small">Gear: Weapon T${formatNumber(playerCombat.weaponTier ?? 0, 1)} | Armor T${formatNumber(
+            playerCombat.armorTier ?? 0,
+            1
+          )}</div>
+        </div>
+      </div>
+    `
 	  }
 
   function renderPrestige(state) {
@@ -356,8 +494,8 @@ export function createUI({ root, store }) {
 
   function renderTabs(state) {
     const tabs = [
-      ["town", "Town"],
       ["skills", "Skills"],
+      ["town", "Town"],
       ["inventory", "Inventory"],
       ["expedition", "Expedition"],
       ["prestige", "Prestige"],
@@ -377,17 +515,37 @@ export function createUI({ root, store }) {
     return lines.map((l) => `<div class="logLine">${escapeHtml(l)}</div>`).join("")
   }
 
-  function craftedResourceIds() {
-    const ids = new Set()
-    for (const recipe of Object.values(RECIPES)) {
-      for (const rid of Object.keys(recipe.out ?? {})) ids.add(rid)
-    }
-    return Array.from(ids)
+  function resourceIdsByCategory(category) {
+    return Object.values(RESOURCES)
+      .filter((r) => r.category === category)
+      .map((r) => r.id)
+  }
+
+  function equippedLabel(slot, entry) {
+    if (!entry?.id) return "Empty"
+    const name = ITEMS[entry.id]?.name ?? entry.id
+    const maxDurability = maxDurabilityForItem(entry.id)
+    const durability = Math.max(0, Math.floor(entry.durability ?? maxDurability))
+    const broken = durability <= 0
+    return `${broken ? "Broken " : ""}${name} (${formatInt(durability)} / ${formatInt(maxDurability)})`
   }
 
   function renderInventory(state) {
-    const ids = craftedResourceIds()
-    const rows = ids
+    const oreIds = resourceIdsByCategory("ore")
+    const barIds = resourceIdsByCategory("bar")
+    const materialIds = [...oreIds, ...barIds]
+    const supplyIds = [
+      ...resourceIdsByCategory("material"),
+      ...resourceIdsByCategory("consumable"),
+      ...resourceIdsByCategory("currency"),
+    ].filter((rid) => !oreIds.includes(rid) && !barIds.includes(rid))
+    const itemIds = Object.values(ITEMS)
+      .map((item) => item.id)
+      .filter((id) => (state.resources[id] ?? 0) > 0)
+    const forge = state.buildings.forge?.level ?? 0
+
+    const materialRows = materialIds
+      .filter((rid) => (state.resources[rid] ?? 0) > 0)
       .map((rid) => {
         const r = RESOURCES[rid]
         const v = state.resources[rid] ?? 0
@@ -395,15 +553,99 @@ export function createUI({ root, store }) {
       })
       .join("")
 
+    const supplyRows = supplyIds
+      .filter((rid) => (state.resources[rid] ?? 0) > 0)
+      .map((rid) => {
+        const r = RESOURCES[rid]
+        const v = state.resources[rid] ?? 0
+        const c = rid === "gold" ? "res res--gold" : "res"
+        return `<div class="${c}"><div class="res__name">${escapeHtml(r?.name ?? rid)}</div><div class="res__val">${formatInt(v)}</div></div>`
+      })
+      .join("")
+
+    const itemRows = itemIds
+      .map((rid) => {
+        const item = ITEMS[rid]
+        const v = state.resources[rid] ?? 0
+        const equippedId = item?.slot ? state.equipment[item.slot]?.id : null
+        const alreadyEquipped = equippedId === rid
+        return `
+          <div class="invItem invItem--gear">
+            <div>
+              <div class="invItem__name">${escapeHtml(item?.name ?? rid)}</div>
+              <div class="muted small">Tier ${item?.tier ?? "?"} | ${formatInt(v)} owned</div>
+            </div>
+            <button class="btn btn--small" data-action="equip-item" data-item="${escapeHtml(rid)}" ${
+              alreadyEquipped ? "disabled" : ""
+            }>${alreadyEquipped ? "Equipped" : "Equip"}</button>
+          </div>
+        `
+      })
+      .join("")
+
     const combat = computePlayerCombat(state)
     const avgHit = 2 + combat.power * 3
     const dps = avgHit / Math.max(0.1, combat.attackInterval)
 
+    const equipmentRows = EQUIPMENT_SLOTS.map((slot) => {
+      const entry = state.equipment[slot]
+      const maxDurability = entry?.id ? maxDurabilityForItem(entry.id) : 0
+      const needsRepair = entry?.id && (entry.durability ?? maxDurability) < maxDurability
+      const repairBar = entry?.id ? RESOURCES[ITEMS[entry.id]?.barId ?? ""]?.name : null
+      return `
+        <div class="equipSlot ${entry?.id ? "" : "equipSlot--empty"}">
+          <div class="equipSlot__label">${escapeHtml(SLOT_LABELS[slot] ?? slot)}</div>
+          <div class="equipSlot__name">${escapeHtml(equippedLabel(slot, entry))}</div>
+          <div class="equipSlot__actions">
+            ${entry?.id ? `<button class="btn btn--tiny" data-action="unequip-item" data-slot="${slot}">Unequip</button>` : ""}
+            ${
+              needsRepair
+                ? `<button class="btn btn--tiny" data-action="repair-item" data-slot="${slot}" ${
+                    forge > 0 ? "" : "disabled"
+                  }>Repair (1 ${escapeHtml(repairBar ?? "Bar")})</button>`
+                : ""
+            }
+          </div>
+        </div>
+      `
+    }).join("")
+
+    const pickaxeTier = ITEMS[state.equipment.pickaxe?.id]?.tier ?? 0
+    const axeTier = ITEMS[state.equipment.axe?.id]?.tier ?? 0
+    const pickaxePerks = toolPerksForTier(pickaxeTier)
+    const axePerks = toolPerksForTier(axeTier)
+
     return `
       <div class="stack">
         <div class="card">
-          <div class="card__title">Inventory</div>
-          ${ids.length ? `<div class="invGrid">${rows}</div>` : `<div class="muted small">No crafted items yet.</div>`}
+          <div class="card__title">Materials</div>
+          ${materialRows ? `<div class="invGrid">${materialRows}</div>` : `<div class="muted small">No materials yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Supplies</div>
+          ${supplyRows ? `<div class="invGrid">${supplyRows}</div>` : `<div class="muted small">No supplies yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Equipment Overview</div>
+          <div class="equipGrid">${equipmentRows}</div>
+        </div>
+        <div class="card">
+          <div class="card__title">Crafted Gear & Tools</div>
+          ${itemRows ? `<div class="invGrid invGrid--gear">${itemRows}</div>` : `<div class="muted small">No gear crafted yet.</div>`}
+        </div>
+        <div class="card">
+          <div class="card__title">Tool Perks</div>
+          <div class="muted small">Pickaxe: Tier ${pickaxeTier || 0} | Speed +${formatInt(
+            Math.round(pickaxePerks.gatherSpeedBonus * 100)
+          )}% | No Durability ${formatInt(
+            Math.round(pickaxePerks.noDurabilityChance * 100)
+          )}% | Double Ore ${formatInt(Math.round(pickaxePerks.doubleResourceChance * 100))}%</div>
+          <div class="muted small">Axe: Tier ${axeTier || 0} | Speed +${formatInt(
+            Math.round(axePerks.gatherSpeedBonus * 100)
+          )}% | No Durability ${formatInt(
+            Math.round(axePerks.noDurabilityChance * 100)
+          )}% | Double Wood ${formatInt(Math.round(axePerks.doubleResourceChance * 100))}%</div>
+          <div class="muted small">Perk thresholds: Tier 3 +5% speed, Tier 5 +10% speed, Tier 7 5% no durability, Tier 9 5% double resource, Tier 10 10% double resource.</div>
         </div>
         <div class="card">
           <div class="card__title">Character Overview</div>
@@ -419,8 +661,8 @@ export function createUI({ root, store }) {
             <div class="stat"><div class="stat__label">DPS</div><div class="stat__val">${formatNumber(dps, 2)}</div></div>
           </div>
           <div class="row">
-            <div class="pill">Weapon Tier ${formatInt(state.equipment.weaponTier ?? 0)}</div>
-            <div class="pill">Armor Tier ${formatInt(state.equipment.armorTier ?? 0)}</div>
+            <div class="pill">Weapon Tier ${formatNumber(combat.weaponTier ?? 0, 1)}</div>
+            <div class="pill">Armor Tier ${formatNumber(combat.armorTier ?? 0, 1)}</div>
           </div>
         </div>
       </div>
@@ -449,7 +691,6 @@ export function createUI({ root, store }) {
             <span class="pill">Legacy: ${formatInt(state.legacy?.points ?? 0)}</span>
           </div>
         </div>
-        ${renderResources(state)}
         <div class="tabs">${renderTabs(state)}</div>
         <div class="panel">${renderPanel(state)}</div>
         <div class="log">
@@ -499,9 +740,29 @@ export function createUI({ root, store }) {
       return
     }
 
+    if (action === "select-skill") {
+      const skillId = target.getAttribute("data-skill")
+      store.update((s) => {
+        s.ui.selectedSkill = skillId
+        if (skillId === "woodcutting") {
+          startGather(s, "woodcutting")
+          return
+        }
+        if (skillId === "mining") {
+          const miningLevel = nextLevelProgress(s.skills.mining?.xp ?? 0).level
+          const unlocked = MINING_NODES.filter((node) => node.level <= miningLevel)
+          const nextTarget =
+            unlocked.find((node) => node.id === s.activity.gatherResource)?.id ?? unlocked[0]?.id
+          if (nextTarget) startGather(s, "mining", nextTarget)
+        }
+      })
+      return
+    }
+
     if (action === "activity-gather") {
       const skillId = target.getAttribute("data-skill")
-      store.update((s) => startGather(s, skillId))
+      const resourceId = target.getAttribute("data-resource")
+      store.update((s) => startGather(s, skillId, resourceId))
       return
     }
 
@@ -563,6 +824,32 @@ export function createUI({ root, store }) {
 
     if (action === "save-reset") {
       store.hardReset()
+      return
+    }
+
+    if (action === "equip-item") {
+      const itemId = target.getAttribute("data-item")
+      store.update((s) => equipItem(s, itemId))
+      return
+    }
+
+    if (action === "unequip-item") {
+      const slot = target.getAttribute("data-slot")
+      store.update((s) => unequipItem(s, slot))
+      return
+    }
+
+    if (action === "repair-item") {
+      const slot = target.getAttribute("data-slot")
+      store.update((s) => repairItem(s, slot))
+      return
+    }
+
+    if (action === "smithing-tier") {
+      const tier = Number(target.getAttribute("data-tier") || 1)
+      store.update((s) => {
+        s.ui.smithingTier = tier
+      })
       return
     }
   }

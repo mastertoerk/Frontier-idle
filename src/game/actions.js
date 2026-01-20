@@ -1,5 +1,6 @@
 import { BUILDINGS, SKILLS } from "./content.js"
-import { scaleCost, canAfford, payCost, nextLevelProgress } from "./math.js"
+import { ITEMS, MINING_NODES, maxDurabilityForItem } from "./items.js"
+import { scaleCost, canAfford, payCost, nextLevelProgress, levelFromXp } from "./math.js"
 import { pushLog } from "./log.js"
 import { RECIPES } from "./recipes.js"
 import { createDefaultState } from "./state.js"
@@ -13,10 +14,24 @@ export function setActivityIdle(state) {
   pushLog(state, "Now idle.")
 }
 
-export function startGather(state, skillId) {
+export function startGather(state, skillId, resourceId = null) {
+  const skillLevel = levelFromXp(state.skills[skillId]?.xp ?? 0)
+  let gatherResource = skillId === "woodcutting" ? "wood" : null
+  if (skillId === "mining") {
+    const targetId = resourceId ?? state.activity.gatherResource
+    const node = MINING_NODES.find((entry) => entry.id === targetId) ?? MINING_NODES[0]
+    if (!node) return
+    if (skillLevel < node.level) return
+    gatherResource = node.id
+  }
   state.activity.type = "gather"
   state.activity.gatherSkill = skillId
-  pushLog(state, `Gathering: ${(SKILLS[skillId]?.name ?? skillId)}.`)
+  state.activity.gatherResource = gatherResource
+  const targetLabel =
+    skillId === "mining" && gatherResource
+      ? ` (${MINING_NODES.find((entry) => entry.id === gatherResource)?.name ?? "Ore"})`
+      : ""
+  pushLog(state, `Gathering: ${(SKILLS[skillId]?.name ?? skillId)}${targetLabel}.`)
 }
 
 export function startCraft(state, recipeId) {
@@ -24,6 +39,8 @@ export function startCraft(state, recipeId) {
   if (!recipe) return
   const lvl = state.buildings[recipe.requiresBuilding]?.level ?? 0
   if (lvl <= 0) return
+  const skillLevel = levelFromXp(state.skills[recipe.skill]?.xp ?? 0)
+  if (skillLevel < (recipe.requiresLevel ?? 1)) return
   state.activity.type = "craft"
   state.activity.craft = { recipeId, inProgress: false, remainingSec: 0 }
   pushLog(state, `Crafting: ${recipe.name}.`)
@@ -44,6 +61,61 @@ export function upgradeBuilding(state, buildingId) {
   payCost(state.resources, cost)
   state.buildings[buildingId].level = current + 1
   pushLog(state, `Upgraded ${b.name} to level ${current + 1}.`)
+}
+
+export function selectMiningTarget(state, resourceId) {
+  const node = MINING_NODES.find((entry) => entry.id === resourceId)
+  if (!node) return
+  const level = levelFromXp(state.skills.mining?.xp ?? 0)
+  if (level < node.level) return
+  state.activity.gatherResource = resourceId
+  if (state.activity.type === "gather" && state.activity.gatherSkill === "mining") {
+    pushLog(state, `Mining: ${node.name}.`)
+  }
+}
+
+export function equipItem(state, itemId) {
+  const item = ITEMS[itemId]
+  if (!item) return
+  if ((state.resources[itemId] ?? 0) <= 0) return
+
+  const slot = item.slot
+  const current = state.equipment[slot]
+  if (current?.id === itemId) return
+
+  state.resources[itemId] -= 1
+  if (current?.id) {
+    state.resources[current.id] = (state.resources[current.id] ?? 0) + 1
+  }
+  state.equipment[slot] = {
+    id: itemId,
+    durability: maxDurabilityForItem(itemId),
+  }
+  pushLog(state, `Equipped ${item.name}.`)
+}
+
+export function unequipItem(state, slot) {
+  const current = state.equipment[slot]
+  if (!current?.id) return
+  state.resources[current.id] = (state.resources[current.id] ?? 0) + 1
+  state.equipment[slot] = null
+  pushLog(state, `Unequipped ${ITEMS[current.id]?.name ?? "item"}.`)
+}
+
+export function repairItem(state, slot) {
+  const current = state.equipment[slot]
+  if (!current?.id) return
+  const item = ITEMS[current.id]
+  if (!item) return
+  const forge = state.buildings.forge?.level ?? 0
+  if (forge <= 0) return
+  const cost = { [item.barId]: 1 }
+  if (!canAfford(state.resources, cost)) return
+  if (current.durability >= maxDurabilityForItem(item.id)) return
+  payCost(state.resources, cost)
+  current.durability = maxDurabilityForItem(item.id)
+  state.skills.smithing.xp += item.xp * 0.25
+  pushLog(state, `Repaired ${item.name}.`)
 }
 
 function canPrestige(state) {

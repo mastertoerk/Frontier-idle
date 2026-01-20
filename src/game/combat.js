@@ -1,14 +1,26 @@
 import { nextLevelProgress } from "./math.js"
 import { computeModifiers } from "./modifiers.js"
+import { ARMOR_SLOTS, ITEMS, maxDurabilityForItem } from "./items.js"
+
+function effectiveTier(item) {
+  if (!item?.id) return 0
+  const tier = ITEMS[item.id]?.tier ?? 0
+  const maxDurability = maxDurabilityForItem(item.id)
+  const durability = item.durability ?? maxDurability
+  const brokenMult = durability > 0 ? 1 : 0.5
+  return tier * brokenMult
+}
 
 export function computePlayerCombat(state) {
   const mods = computeModifiers(state)
   const combatLevel = nextLevelProgress(state.skills.combat.xp).level
-  const weapon = state.equipment.weaponTier ?? 0
-  const armor = state.equipment.armorTier ?? 0
+  const weapon = effectiveTier(state.equipment.weapon)
+  const armorTotal = ARMOR_SLOTS.reduce((sum, slot) => sum + effectiveTier(state.equipment[slot]), 0)
+  const armorPieces = ARMOR_SLOTS.filter((slot) => state.equipment[slot]?.id).length
+  const armor = armorPieces > 0 ? armorTotal / armorPieces : 0
   const power = (1 + combatLevel * 0.18 + weapon * 0.45) * mods.combatPowerMult
   const toughness = 1 + combatLevel * 0.12 + armor * 0.5
   const maxHp = Math.floor(30 + combatLevel * 8 + armor * 10)
   const attackInterval = Math.max(0.45, Math.min(1.2, 1.15 / (0.75 + power / 6)))
-  return { power, toughness, combatLevel, maxHp, attackInterval }
+  return { power, toughness, combatLevel, maxHp, attackInterval, weaponTier: weapon, armorTier: armor }
 }

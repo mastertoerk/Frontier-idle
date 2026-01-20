@@ -3,6 +3,7 @@ import { computeModifiers } from "./modifiers.js"
 import { nextLevelProgress } from "./math.js"
 import { computePlayerCombat } from "./combat.js"
 import { pushLog } from "./log.js"
+import { ITEMS, ARMOR_SLOTS, maxDurabilityForItem } from "./items.js"
 
 const ENEMIES_BY_TIER = [
   ["Slime", "Boar", "Wolf", "Giant Rat"],
@@ -144,6 +145,18 @@ function ensureCombatRoomInitialized(state, room) {
   }
 }
 
+function applyDurabilityLoss(state, slot, amount) {
+  const eq = state.equipment[slot]
+  if (!eq?.id) return
+  const maxDurability = maxDurabilityForItem(eq.id)
+  const before = eq.durability ?? maxDurability
+  const next = Math.max(0, before - amount)
+  eq.durability = next
+  if (before > 0 && next <= 0) {
+    pushLog(state, `Broken ${ITEMS[eq.id]?.name ?? "item"}.`)
+  }
+}
+
 function tickCombatRoom(state, room, dtSec) {
   ensureCombatRoomInitialized(state, room)
   const c = room.combat
@@ -188,6 +201,7 @@ function tickCombatRoom(state, room, dtSec) {
           const dmg = Math.max(1, Math.floor(base * (crit ? 1.6 : 1)))
           c.enemyHp = Math.max(0, c.enemyHp - dmg)
           pushFeed(state, `You hit ${c.enemyName} for ${dmg}${crit ? " (crit)" : ""}.`)
+          applyDurabilityLoss(state, "weapon", 1)
         }
       }
     } else {
@@ -207,6 +221,9 @@ function tickCombatRoom(state, room, dtSec) {
           c.playerHp = Math.max(0, c.playerHp - dmg)
           c.damageTaken += dmg
           pushFeed(state, `${c.enemyName} hits you for ${dmg}.`)
+          for (const slot of ARMOR_SLOTS) {
+            applyDurabilityLoss(state, slot, 1)
+          }
         }
       }
     }

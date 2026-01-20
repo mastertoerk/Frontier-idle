@@ -1,14 +1,44 @@
-export const RECIPES = /** @type {const} */ ({
-  smeltBars: {
-    id: "smeltBars",
-    name: "Smelt Bars",
+import { BARS, ITEMS } from "./items.js"
+
+const smithingRecipes = {}
+
+for (const bar of Object.values(BARS)) {
+  const id = `smelt_${bar.id}`
+  smithingRecipes[id] = {
+    id,
+    name: `Smelt ${bar.name}`,
     skill: "smithing",
     durationSec: 2.5,
-    in: { ore: 3 },
-    out: { bars: 1 },
-    xp: 8,
+    in: bar.oreCost,
+    out: { [bar.id]: 1 },
+    xp: bar.xp,
     requiresBuilding: "forge",
-  },
+    requiresLevel: bar.level,
+    tier: bar.tier,
+    category: "smelt",
+  }
+}
+
+for (const item of Object.values(ITEMS)) {
+  const id = `craft_${item.id}`
+  smithingRecipes[id] = {
+    id,
+    name: `Forge ${item.name}`,
+    skill: "smithing",
+    durationSec: 2.25 + item.barCost * 0.8,
+    in: { [item.barId]: item.barCost },
+    out: { [item.id]: 1 },
+    xp: item.xp,
+    requiresBuilding: "forge",
+    requiresLevel: item.smithingLevel,
+    tier: item.tier,
+    category: item.slot === "pickaxe" || item.slot === "axe" ? "tool" : item.slot === "weapon" ? "weapon" : "armor",
+    itemId: item.id,
+  }
+}
+
+export const RECIPES = /** @type {const} */ ({
+  ...smithingRecipes,
   cookRations: {
     id: "cookRations",
     name: "Cook Rations",
@@ -18,6 +48,7 @@ export const RECIPES = /** @type {const} */ ({
     out: { rations: 1 },
     xp: 7,
     requiresBuilding: "campfire",
+    requiresLevel: 1,
   },
   brewPotions: {
     id: "brewPotions",
@@ -28,32 +59,10 @@ export const RECIPES = /** @type {const} */ ({
     out: { potions: 1 },
     xp: 10,
     requiresBuilding: "alchemistHut",
-  },
-  craftWeapon: {
-    id: "craftWeapon",
-    name: "Craft Weapon (Tier +1)",
-    skill: "smithing",
-    durationSec: 6.0,
-    in: { bars: 12, wood: 10 },
-    out: {},
-    xp: 35,
-    requiresBuilding: "forge",
-    special: "weapon",
-  },
-  craftArmor: {
-    id: "craftArmor",
-    name: "Craft Armor (Tier +1)",
-    skill: "smithing",
-    durationSec: 7.0,
-    in: { bars: 16 },
-    out: {},
-    xp: 40,
-    requiresBuilding: "forge",
-    special: "armor",
+    requiresLevel: 1,
   },
 })
 
 export function listRecipeIds() {
   return /** @type {Array<keyof typeof RECIPES>} */ (Object.keys(RECIPES))
 }
-
