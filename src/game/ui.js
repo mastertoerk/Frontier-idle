@@ -1166,7 +1166,10 @@ export function createUI({ root, store }) {
       <div class="hud">
         ${renderToasts(state)}
         <div class="hudTop">
-          <div class="title">Frontier Idle</div>
+          <div class="titleBlock">
+            <div class="title">Frontier Idle</div>
+            <div class="subtitle">a creation of Mastertoerk</div>
+          </div>
           <div class="hudMeta">
             <span class="pill">Storage: ${formatInt(computeModifiers(state).storageCap)}</span>
             <span class="pill">Legacy: ${formatInt(state.legacy?.points ?? 0)}</span>

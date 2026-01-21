@@ -55,6 +55,19 @@ body
     letter-spacing: 0.2px;
 }
 
+.titleBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.subtitle {
+    font-size: 11px;
+    color: rgba(233, 238, 246, 0.6);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
 .hudMeta {
     display: flex;
     gap: 8px;
