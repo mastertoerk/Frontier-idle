@@ -5,6 +5,7 @@ import { computePlayerCombat } from "./combat.js"
 import { pushLog } from "./log.js"
 import { ITEMS, ARMOR_SLOTS, maxDurabilityForItem } from "./items.js"
 import { COOKED_FISH } from "./fishing.js"
+import { POTION_BY_ID } from "./potions.js"
 
 const ENEMIES_BY_TIER = [
   ["Slime", "Boar", "Wolf", "Giant Rat"],
@@ -117,13 +118,14 @@ function ensureCombatRoomInitialized(state, room) {
   if (room.combat) return
   const isBoss = room.type === "boss"
   const { power, toughness, combatLevel, maxHp, attackInterval } = computePlayerCombat(state)
+  const activePotion = state.potion?.active
 
   const enemyPower = 1 + room.difficulty * (1.2 + 0.35 * state.expedition.risk) + (isBoss ? 4 : 0)
   const enemyMaxHp = Math.floor(18 + room.difficulty * 14 + (isBoss ? 75 : 0))
   const playerMaxHp = maxHp
 
   const playerInterval = attackInterval
-  const enemyInterval = Math.max(0.6, Math.min(1.5, 1.35 / (0.7 + enemyPower / 7)))
+  const enemyInterval = 2.4
 
   room.combat = {
     enemyName: pickEnemyName(room.seed, room.difficulty, isBoss),
@@ -141,6 +143,13 @@ function ensureCombatRoomInitialized(state, room) {
     rng: { t: (room.seed ^ 0xdeadbeef) >>> 0 },
     damageTaken: 0,
     started: false,
+    autoFight: state.ui?.combatAuto ?? true,
+    playerQueued: 0,
+    lastAutoEatAt: 0,
+    buffPotionUsed: !!(activePotion && activePotion.kind !== "heal"),
+    hitSeq: 0,
+    lastEnemyHit: null,
+    lastPlayerHit: null,
   }
 }
 
@@ -164,9 +173,22 @@ function applyDurabilityLoss(state, slot, amount) {
   }
 }
 
+function recordHit(combat, target, amount, crit, now) {
+  combat.hitSeq = (combat.hitSeq ?? 0) + 1
+  const entry = { amount, crit, at: now, seq: combat.hitSeq }
+  if (target === "enemy") {
+    combat.lastEnemyHit = entry
+  } else {
+    combat.lastPlayerHit = entry
+  }
+}
+
 function tickCombatRoom(state, room, dtSec) {
   ensureCombatRoomInitialized(state, room)
   const c = room.combat
+  const now = state.meta?.simTimeMs ?? Date.now()
+  const speed = c.autoFight ? 1.2 : 1
+  const dt = dtSec * speed
   const live = computePlayerCombat(state)
   c.playerPower = live.power
   c.playerToughness = live.toughness
@@ -192,26 +214,31 @@ function tickCombatRoom(state, room, dtSec) {
     pushFeed(state, `${c.enemyName} appears!`)
   }
 
-  if (c.playerHp / c.playerMaxHp < 0.55) {
+  if (c.autoFight && c.playerHp / c.playerMaxHp < 0.55 && now - (c.lastAutoEatAt ?? 0) >= 6000) {
     const fish = findCookedFish(state, true)
     if (fish) {
       state.resources[fish.id] -= 1
       c.playerHp = Math.min(c.playerMaxHp, c.playerHp + fish.heal)
       pushFeed(state, `You eat ${fish.name} and heal ${fish.heal}.`)
+      c.lastAutoEatAt = now
     }
   }
 
-  c.playerCd -= dtSec
-  c.enemyCd -= dtSec
+  c.playerCd -= dt
+  c.enemyCd -= dt
 
   let safety = 0
-  while (safety++ < 20) {
-    const next = Math.min(c.playerCd, c.enemyCd)
-    if (next > 0) break
+  const maxActions = c.autoFight ? 10 : 1
+  while (safety++ < maxActions) {
+    const playerReady = c.playerCd <= 0
+    const enemyReady = c.enemyCd <= 0
+    const playerCanAct = playerReady && (c.autoFight || (c.playerQueued ?? 0) > 0)
+    if (!playerCanAct && !enemyReady) break
 
-    if (c.playerCd <= c.enemyCd) {
+    if (playerCanAct && (!enemyReady || c.playerCd <= c.enemyCd)) {
       // Player attacks
       c.playerCd += c.playerInterval
+      if (!c.autoFight) c.playerQueued = Math.max(0, (c.playerQueued ?? 0) - 1)
       const r = rngNextFloat(c.rng)
       const hitChance = Math.max(
         0.55,
@@ -232,10 +259,11 @@ function tickCombatRoom(state, room, dtSec) {
           const dmg = Math.max(1, Math.floor(base * (crit ? 1.6 : 1)))
           c.enemyHp = Math.max(0, c.enemyHp - dmg)
           pushFeed(state, `You hit ${c.enemyName} for ${dmg}${crit ? " (crit)" : ""}.`)
+          recordHit(c, "enemy", dmg, crit, now)
           applyDurabilityLoss(state, "weapon", 1)
         }
       }
-    } else {
+    } else if (enemyReady) {
       // Enemy attacks
       c.enemyCd += c.enemyInterval
       const r = rngNextFloat(c.rng)
@@ -252,6 +280,7 @@ function tickCombatRoom(state, room, dtSec) {
           c.playerHp = Math.max(0, c.playerHp - dmg)
           c.damageTaken += dmg
           pushFeed(state, `${c.enemyName} hits you for ${dmg}.`)
+          recordHit(c, "player", dmg, false, now)
           for (const slot of ARMOR_SLOTS) {
             applyDurabilityLoss(state, slot, 1)
           }
@@ -306,6 +335,78 @@ export function startExpedition(state, { risk = 1 }) {
   state.meta.lastTickAt = now
   pushLog(state, `Expedition started (Risk ${state.expedition.risk}).`)
   pushFeed(state, `You head out (Risk ${state.expedition.risk}).`)
+}
+
+export function toggleCombatAuto(state) {
+  const room = state.expedition?.room
+  if (!room?.combat) return
+  room.combat.autoFight = !room.combat.autoFight
+  state.ui.combatAuto = room.combat.autoFight
+  pushFeed(state, room.combat.autoFight ? "Auto fight engaged." : "Manual combat engaged.")
+}
+
+export function queueCombatAttack(state) {
+  const room = state.expedition?.room
+  if (!room?.combat) return
+  if ((room.combat.playerCd ?? 0) > 0) return
+  room.combat.playerQueued = Math.min(1, (room.combat.playerQueued ?? 0) + 1)
+}
+
+export function useCombatFood(state, fishId = null) {
+  const room = state.expedition?.room
+  const combat = room?.combat
+  if (!combat) return
+  const fish =
+    (fishId ? COOKED_FISH.find((entry) => entry.id === fishId && (state.resources[entry.id] ?? 0) > 0) : null) ??
+    findCookedFish(state, true)
+  if (!fish) return
+  state.resources[fish.id] -= 1
+  combat.playerHp = Math.min(combat.playerMaxHp, combat.playerHp + fish.heal)
+  pushFeed(state, `You eat ${fish.name} and heal ${fish.heal}.`)
+}
+
+export function useCombatPotion(state, potionId) {
+  const room = state.expedition?.room
+  const combat = room?.combat
+  if (!combat) return
+  const potion = POTION_BY_ID[potionId]
+  if (!potion) return
+  if (potion.kind !== "heal" && combat.buffPotionUsed) {
+    pushFeed(state, "Only one combat buff potion can be used per fight.")
+    return
+  }
+  const now = state.meta?.simTimeMs ?? Date.now()
+  const cooldowns = state.potion?.cooldowns ?? { healingUntil: 0, regenUntil: 0 }
+  if (potion.kind === "heal" && now < (cooldowns.healingUntil ?? 0)) return
+  if (potion.kind === "regen" && now < (cooldowns.regenUntil ?? 0)) return
+  if ((state.resources[potionId] ?? 0) <= 0) return
+
+  state.resources[potionId] -= 1
+  const active = {
+    ...potion,
+    startedAt: now,
+    endsAt: potion.durationSec ? now + potion.durationSec * 1000 : now,
+    nextTickAt: now + (potion.intervalSec ?? 0) * 1000,
+  }
+
+  if (potion.kind === "heal") {
+    cooldowns.healingUntil = now + (potion.cooldownSec ?? 30) * 1000
+    combat.playerHp = Math.min(combat.playerMaxHp, combat.playerHp + potion.amount)
+    pushFeed(state, `You drink ${potion.name} and heal ${potion.amount}.`)
+  } else if (potion.kind === "regen") {
+    cooldowns.regenUntil = now + (potion.cooldownSec ?? 60) * 1000
+    state.potion.active = active
+    combat.buffPotionUsed = true
+    pushFeed(state, `You drink ${potion.name}.`)
+  } else {
+    state.potion.active = active
+    combat.buffPotionUsed = true
+    pushFeed(state, `You drink ${potion.name}.`)
+  }
+
+  state.potion.cooldowns = cooldowns
+  if (potion.kind === "heal") return
+  state.potion.active = active
 }
 
 export function stopExpedition(state) {

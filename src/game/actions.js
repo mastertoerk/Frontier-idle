@@ -91,6 +91,8 @@ export function harvestCrop(state, patchId) {
 export function drinkPotion(state, potionId) {
   const potion = POTION_BY_ID[potionId]
   if (!potion) return
+  const combat = state.expedition?.room?.combat
+  if (combat && potion.kind !== "heal" && combat.buffPotionUsed) return
   const now = state.meta?.simTimeMs ?? Date.now()
   const cooldowns = state.potion?.cooldowns ?? { healingUntil: 0, regenUntil: 0 }
   if (potion.kind === "heal" && now < (cooldowns.healingUntil ?? 0)) return
@@ -114,10 +116,12 @@ export function drinkPotion(state, potionId) {
     }
   } else if (potion.kind === "regen") {
     cooldowns.regenUntil = now + (potion.cooldownSec ?? 60) * 1000
+    if (combat) combat.buffPotionUsed = true
   }
 
   state.potion.cooldowns = cooldowns
   pushLog(state, `Drank ${potion.name}.`)
+  if (combat && potion.kind !== "heal") combat.buffPotionUsed = true
 }
 
 export function startCraft(state, recipeId) {

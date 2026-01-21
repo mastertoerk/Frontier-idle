@@ -1,4 +1,4 @@
-import { SKILLS } from "./content.js"
+import { RESOURCES, SKILLS } from "./content.js"
 import { ITEMS, MINING_NODES, toolPerksForTier, maxDurabilityForItem } from "./items.js"
 import { FISHING_NODES, burnChanceFor } from "./fishing.js"
 import { SCAVENGING_ZONES } from "./scavenging.js"
@@ -12,14 +12,38 @@ function storageCapFor(state) {
   return computeModifiers(state).storageCap
 }
 
-function addResource(state, resourceId, amount) {
+function resourceRoom(state, resourceId) {
   const cap = storageCapFor(state)
-  const next = (state.resources[resourceId] ?? 0) + amount
-  state.resources[resourceId] = Math.max(0, Math.min(cap, next))
+  const current = state.resources[resourceId] ?? 0
+  return Math.max(0, cap - current)
+}
+
+function addResource(state, resourceId, amount) {
+  if (amount <= 0) return 0
+  const current = state.resources[resourceId] ?? 0
+  const room = resourceRoom(state, resourceId)
+  const added = Math.min(room, amount)
+  if (added <= 0) return 0
+  state.resources[resourceId] = current + added
+  return added
 }
 
 function addXp(state, skillId, amount) {
+  if (amount <= 0) return
+  const before = nextLevelProgress(state.skills[skillId].xp).level
   state.skills[skillId].xp += amount
+  const after = nextLevelProgress(state.skills[skillId].xp).level
+  if (after > before) {
+    const skillName = SKILLS[skillId]?.name ?? skillId
+    const message = `${skillName} reached level ${after}!`
+    pushLog(state, message)
+    state.ui.toasts = state.ui.toasts ?? []
+    const now = state.meta?.simTimeMs ?? Date.now()
+    const toastId = (state.ui.toastSeq ?? 0) + 1
+    state.ui.toastSeq = toastId
+    state.ui.toasts.push({ id: toastId, message, endsAt: now + 4500 })
+    state.ui.toasts = state.ui.toasts.slice(-4)
+  }
 }
 
 function applyDurabilityLoss(state, slot, amount) {
@@ -42,6 +66,11 @@ function tickGather(state, dtSec) {
   const mods = computeModifiers(state)
   const injured = (state._injuredUntil ?? 0) > (state.meta?.simTimeMs ?? 0)
   const eff = injured ? 0.6 : 1
+  const stopForStorage = (resourceName) => {
+    state.activity.type = "idle"
+    state.activity.gatherProgressSec = 0
+    pushLog(state, `Storage full for ${resourceName}. Activity stopped.`)
+  }
 
   state.activity.gatherIntervalSec = state.activity.gatherIntervalSec ?? 1
   state.activity.gatherProgressSec = state.activity.gatherProgressSec ?? 0
@@ -54,6 +83,10 @@ function tickGather(state, dtSec) {
     const targetId = state.activity.gatherResource ?? MINING_NODES[0]?.id
     const node = MINING_NODES.find((entry) => entry.id === targetId)
     if (!node) return
+    if (resourceRoom(state, node.id) <= 0) {
+      stopForStorage(node.name ?? node.id)
+      return
+    }
     const pickaxe = state.equipment.pickaxe
     const toolTier = ITEMS[pickaxe?.id]?.tier ?? 0
     const maxDurability = pickaxe?.id ? maxDurabilityForItem(pickaxe.id) : 0
@@ -68,11 +101,17 @@ function tickGather(state, dtSec) {
     yieldPerSec *= 1 + perks.gatherSpeedBonus
     const yieldMult = 1 + perks.doubleResourceChance
     const finalYield = yieldPerSec * yieldMult * dtSec
-    addResource(state, node.id, finalYield)
+    const added = addResource(state, node.id, finalYield)
+    if (added <= 0) {
+      stopForStorage(node.name ?? node.id)
+      return
+    }
+    const ratio = finalYield > 0 ? added / finalYield : 0
     const xpPerSec = node.xp * yieldPerSec * mods.gatherXpMult
-    addXp(state, skillId, xpPerSec * dtSec)
+    addXp(state, skillId, xpPerSec * dtSec * ratio)
     const durabilityLoss = yieldPerSec * dtSec * (1 - perks.noDurabilityChance)
     applyDurabilityLoss(state, "pickaxe", durabilityLoss)
+    if (added < finalYield) stopForStorage(node.name ?? node.id)
     return
   }
 
@@ -80,11 +119,21 @@ function tickGather(state, dtSec) {
     const targetId = state.activity.gatherResource ?? FISHING_NODES[0]?.id
     const node = FISHING_NODES.find((entry) => entry.id === targetId)
     if (!node) return
+    if (resourceRoom(state, node.rawId) <= 0) {
+      stopForStorage(node.name ?? node.rawId)
+      return
+    }
     let yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
     const finalYield = yieldPerSec * dtSec
-    addResource(state, node.rawId, finalYield)
+    const added = addResource(state, node.rawId, finalYield)
+    if (added <= 0) {
+      stopForStorage(node.name ?? node.rawId)
+      return
+    }
+    const ratio = finalYield > 0 ? added / finalYield : 0
     const xpPerSec = node.fishingXp * yieldPerSec * mods.gatherXpMult
-    addXp(state, skillId, xpPerSec * dtSec)
+    addXp(state, skillId, xpPerSec * dtSec * ratio)
+    if (added < finalYield) stopForStorage(node.name ?? node.rawId)
     return
   }
 
@@ -92,18 +141,28 @@ function tickGather(state, dtSec) {
     const targetId = state.activity.gatherResource ?? SCAVENGING_ZONES[0]?.id
     const zone = SCAVENGING_ZONES.find((entry) => entry.id === targetId)
     if (!zone) return
+    const hasRoom = zone.reagents.some((reagent) => resourceRoom(state, reagent.id) > 0)
+    if (!hasRoom) {
+      stopForStorage(zone.name ?? "reagents")
+      return
+    }
     const totalRolls = Math.max(0, Math.round(actions * (zone.rolls ?? 1) * mods.gatherYieldMult))
     if (totalRolls > 0) {
+      let gained = 0
       for (let i = 0; i < totalRolls; i++) {
         const idx = Math.floor(Math.random() * zone.reagents.length)
         const reagent = zone.reagents[idx]
-        if (reagent) addResource(state, reagent.id, 1)
+        if (reagent && addResource(state, reagent.id, 1) > 0) gained += 1
       }
-      addXp(state, skillId, zone.xp * totalRolls * mods.gatherXpMult)
+      if (gained > 0) addXp(state, skillId, zone.xp * gained * mods.gatherXpMult)
     }
     return
   }
   if (skillId === "woodcutting") {
+    if (resourceRoom(state, "wood") <= 0) {
+      stopForStorage(RESOURCES.wood?.name ?? "wood")
+      return
+    }
     const axe = state.equipment.axe
     const toolTier = ITEMS[axe?.id]?.tier ?? 0
     const maxDurability = axe?.id ? maxDurabilityForItem(axe.id) : 0
@@ -118,21 +177,37 @@ function tickGather(state, dtSec) {
     yieldPerSec *= 1 + perks.gatherSpeedBonus
     const yieldMult = 1 + perks.doubleResourceChance
     const finalYield = yieldPerSec * yieldMult * dtSec
-    addResource(state, "wood", finalYield)
+    const added = addResource(state, "wood", finalYield)
+    if (added <= 0) {
+      stopForStorage(RESOURCES.wood?.name ?? "wood")
+      return
+    }
+    const ratio = finalYield > 0 ? added / finalYield : 0
     const xpPerSec = (skill.baseXpPerSecond ?? 0) * mods.gatherXpMult * eff * (1 + perks.gatherSpeedBonus)
-    addXp(state, skillId, xpPerSec * dtSec)
+    addXp(state, skillId, xpPerSec * dtSec * ratio)
     const durabilityLoss = yieldPerSec * dtSec * (1 - perks.noDurabilityChance)
     applyDurabilityLoss(state, "axe", durabilityLoss)
+    if (added < finalYield) stopForStorage(RESOURCES.wood?.name ?? "wood")
     return
   }
 
   const yieldPerSec = (skill.baseYieldPerSecond ?? 0) * mods.gatherYieldMult * eff
   const xpPerSec = (skill.baseXpPerSecond ?? 0) * mods.gatherXpMult * eff
 
-  for (const [rid, mult] of Object.entries(skill.yields)) {
-    addResource(state, rid, yieldPerSec * mult * dtSec)
+  const yieldEntries = Object.entries(skill.yields)
+  let expectedTotal = 0
+  let addedTotal = 0
+  for (const [rid, mult] of yieldEntries) {
+    const expected = yieldPerSec * mult * dtSec
+    expectedTotal += expected
+    addedTotal += addResource(state, rid, expected)
   }
-  addXp(state, skillId, xpPerSec * dtSec)
+  if (addedTotal > 0 && expectedTotal > 0) {
+    addXp(state, skillId, xpPerSec * dtSec * (addedTotal / expectedTotal))
+  } else if (expectedTotal > 0) {
+    const name = yieldEntries.length === 1 ? RESOURCES[yieldEntries[0][0]]?.name ?? yieldEntries[0][0] : "resources"
+    stopForStorage(name)
+  }
 }
 
 function tickCraft(state, dtSec) {
@@ -216,9 +291,13 @@ export function tickSimulation(state, dtSec) {
   if (state.activity.type === "craft") tickCraft(state, dt)
   if (state.activity.type === "expedition") tickExpedition(state, dt)
 
+  if (state.ui?.toasts?.length) {
+    state.ui.toasts = state.ui.toasts.filter((toast) => (toast.endsAt ?? 0) > state.meta.simTimeMs)
+  }
+
   // Passive trickle: low-value, but keeps the world feeling alive.
   const workshopLvl = state.buildings.workshop?.level ?? 0
-  if (workshopLvl > 0) {
+  if (workshopLvl > 0 && state.activity.type === "idle") {
     addResource(state, "wood", dt * 0.08 * workshopLvl)
     addResource(state, "dullstoneOre", dt * 0.06 * workshopLvl)
   }

@@ -17,7 +17,7 @@ export function computeModifiers(state) {
   const lootMult = 1 + 0.05 * (b.scoutLodge?.level ?? 0) + 0.03 * (b.alchemistHut?.level ?? 0)
   const injuryChanceMult = 1 - Math.min(0.35, 0.04 * (b.scoutLodge?.level ?? 0))
 
-  const storageCap = 200 + 150 * (b.storehouse?.level ?? 0)
+  const storageCap = 200 + 250 * (b.storehouse?.level ?? 0)
 
   return {
     globalXpMult,
@@ -32,4 +32,3 @@ export function computeModifiers(state) {
     storageCap,
   }
 }
-

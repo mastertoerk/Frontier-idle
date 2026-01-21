@@ -24,7 +24,15 @@ import {
   unequipItem,
   upgradeBuilding,
 } from "./actions.js"
-import { chooseExpeditionOption, startExpedition, stopExpedition } from "./expedition.js"
+import {
+  chooseExpeditionOption,
+  queueCombatAttack,
+  startExpedition,
+  stopExpedition,
+  toggleCombatAuto,
+  useCombatFood,
+  useCombatPotion,
+} from "./expedition.js"
 import { RECIPES } from "./recipes.js"
 import { computeModifiers } from "./modifiers.js"
 import { computePlayerCombat } from "./combat.js"
@@ -473,6 +481,105 @@ export function createUI({ root, store }) {
     return `<div class="stack">${renderActivitySummary(state)}${renderSkillSelector(state)}${activeProgressUi}${skillPanel}${skills}</div>`
   }
 
+  function renderHpBar(label, current, max) {
+    const pct = max > 0 ? Math.max(0, Math.min(100, Math.floor((current / max) * 100))) : 0
+    return `
+      <div class="hpBar">
+        <div class="hpBar__label">${escapeHtml(label)}: ${formatInt(current)} / ${formatInt(max)}</div>
+        <div class="hpBar__track"><div class="hpBar__fill" style="width:${pct}%"></div></div>
+      </div>
+    `
+  }
+
+  function renderCombatEncounter(state, room) {
+    const combat = room.combat
+    if (!combat) return ""
+    const now = state.meta?.simTimeMs ?? Date.now()
+    const hitTtl = 2200
+    const hitFade = 500
+    const lastEnemyHit =
+      combat.lastEnemyHit && now - (combat.lastEnemyHit.at ?? 0) < hitTtl ? combat.lastEnemyHit : null
+    const lastPlayerHit =
+      combat.lastPlayerHit && now - (combat.lastPlayerHit.at ?? 0) < hitTtl ? combat.lastPlayerHit : null
+
+    const renderHit = (hit, cls) => {
+      if (!hit) return ""
+      const age = Math.max(0, now - (hit.at ?? 0))
+      const fadeStart = hitTtl - hitFade
+      const fadePct = age > fadeStart ? Math.min(1, (age - fadeStart) / hitFade) : 0
+      const opacity = 1 - fadePct
+      const lift = fadePct * 10
+      return `<div class="hit ${cls}" style="opacity:${opacity};transform: translateY(${-lift}px);">-${formatInt(
+        hit.amount
+      )}</div>`
+    }
+
+    const fishRows = COOKED_FISH.filter((fish) => (state.resources[fish.id] ?? 0) > 0)
+      .map(
+        (fish) => `
+        <button class="btn btn--tiny" data-action="combat-food" data-food="${escapeHtml(fish.id)}">
+          Eat ${escapeHtml(fish.name)} (${formatInt(fish.heal)} HP) x${formatInt(state.resources[fish.id] ?? 0)}
+        </button>
+      `
+      )
+      .join("")
+
+    const potionRows = POTIONS.filter((potion) => (state.resources[potion.id] ?? 0) > 0)
+      .map(
+        (potion) => `
+        <button class="btn btn--tiny" data-action="combat-potion" data-potion="${escapeHtml(potion.id)}">
+          Use ${escapeHtml(potion.name)} x${formatInt(state.resources[potion.id] ?? 0)}
+        </button>
+      `
+      )
+      .join("")
+
+    const playerPct = combat.playerInterval > 0 ? Math.max(0, Math.min(1, 1 - combat.playerCd / combat.playerInterval)) : 0
+    const enemyPct = combat.enemyInterval > 0 ? Math.max(0, Math.min(1, 1 - combat.enemyCd / combat.enemyInterval)) : 0
+
+    return `
+      <div class="combatScreen">
+        <div class="combatLane">
+          <div class="combatSide combatSide--player">
+            ${renderHpBar("You", combat.playerHp, combat.playerMaxHp)}
+            <div class="attackBar">
+              <div class="attackBar__label">Next attack</div>
+              <div class="attackBar__track"><div class="attackBar__fill" style="width:${Math.floor(playerPct * 100)}%"></div></div>
+            </div>
+            <div class="combatAvatar">
+              <div class="combatAvatar__core">Adventurer</div>
+              ${renderHit(lastPlayerHit, "hit--player")}
+            </div>
+          </div>
+          <div class="combatSide combatSide--enemy">
+            ${renderHpBar(combat.enemyName, combat.enemyHp, combat.enemyMaxHp)}
+            <div class="attackBar attackBar--enemy">
+              <div class="attackBar__label">Next attack</div>
+              <div class="attackBar__track"><div class="attackBar__fill" style="width:${Math.floor(enemyPct * 100)}%"></div></div>
+            </div>
+            <div class="combatAvatar combatAvatar--enemy">
+              <div class="combatAvatar__core">${escapeHtml(combat.enemyName)}</div>
+              ${renderHit(lastEnemyHit, "hit--enemy")}
+            </div>
+          </div>
+        </div>
+        <div class="combatActions">
+          <div class="row">
+            <button class="btn" data-action="combat-attack" ${combat.autoFight || combat.playerCd > 0 ? "disabled" : ""}>
+              Attack
+            </button>
+            <button class="btn" data-action="combat-auto">${combat.autoFight ? "Auto Fight: On" : "Auto Fight: Off"}</button>
+          </div>
+          <div class="combatInventory">
+            <div class="combatInventory__title">Inventory</div>
+            <div class="row">${fishRows || `<div class="muted small">No cooked fish.</div>`}</div>
+            <div class="row">${potionRows || `<div class="muted small">No potions.</div>`}</div>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
 	  function renderExpedition(state) {
 	    const e = state.expedition
 	    if (!e.active) {
@@ -508,6 +615,7 @@ export function createUI({ root, store }) {
                 ? "Event"
 	                : "Unknown"
 
+      const isCombatRoom = room?.type === "combat" || room?.type === "boss"
 	    const combat = room?.combat
       const playerCombat = computePlayerCombat(state)
 	    const pct =
@@ -579,6 +687,7 @@ export function createUI({ root, store }) {
 	          <div class="muted small">${escapeHtml(progressLabel)}</div>
 	        </div>
 	        ${choiceUi}
+          ${isCombatRoom ? renderCombatEncounter(state, room) : ""}
 	        ${feedUi}
 	        <div class="card">
 	          <div class="card__title">Supplies</div>
@@ -683,6 +792,17 @@ export function createUI({ root, store }) {
     const lines = (state.ui.log ?? []).slice(0, 14)
     if (lines.length === 0) return `<div class="muted small">No log yet.</div>`
     return lines.map((l) => `<div class="logLine">${escapeHtml(l)}</div>`).join("")
+  }
+
+  function renderToasts(state) {
+    const now = state.meta?.simTimeMs ?? Date.now()
+    const toasts = (state.ui.toasts ?? []).filter((toast) => (toast.endsAt ?? 0) > now)
+    if (toasts.length === 0) return ""
+    return `
+      <div class="toastStack">
+        ${toasts.map((toast) => `<div class="toast">${escapeHtml(toast.message)}</div>`).join("")}
+      </div>
+    `
   }
 
   function resourceIdsByCategory(category) {
@@ -1029,6 +1149,10 @@ export function createUI({ root, store }) {
     const state = store.getState()
     const scrollTop = root.scrollTop
     const scrollLeft = root.scrollLeft
+    const wideCombat =
+      state.ui?.tab === "expedition" &&
+      (state.expedition?.room?.type === "combat" || state.expedition?.room?.type === "boss")
+    root.classList.toggle("hud--wide", wideCombat)
 
     const active = document.activeElement
     const wasSaveFocused = active && active.id === "saveBox"
@@ -1040,6 +1164,7 @@ export function createUI({ root, store }) {
 
     root.innerHTML = `
       <div class="hud">
+        ${renderToasts(state)}
         <div class="hudTop">
           <div class="title">Frontier Idle</div>
           <div class="hudMeta">
@@ -1132,6 +1257,28 @@ export function createUI({ root, store }) {
     if (action === "expedition-choice") {
       const choiceId = target.getAttribute("data-choice")
       store.update((s) => chooseExpeditionOption(s, choiceId))
+      return
+    }
+
+    if (action === "combat-attack") {
+      store.update((s) => queueCombatAttack(s))
+      return
+    }
+
+    if (action === "combat-auto") {
+      store.update((s) => toggleCombatAuto(s))
+      return
+    }
+
+    if (action === "combat-food") {
+      const foodId = target.getAttribute("data-food")
+      store.update((s) => useCombatFood(s, foodId))
+      return
+    }
+
+    if (action === "combat-potion") {
+      const potionId = target.getAttribute("data-potion")
+      store.update((s) => useCombatPotion(s, potionId))
       return
     }
 

@@ -17,13 +17,16 @@ export function computePlayerCombat(state) {
   const potion = potionModifiers(state)
   const combatLevel = nextLevelProgress(state.skills.combat.xp).level
   const weapon = effectiveTier(state.equipment.weapon)
+  const weaponType = state.equipment.weapon?.id ? ITEMS[state.equipment.weapon.id]?.type : null
   const armorTotal = ARMOR_SLOTS.reduce((sum, slot) => sum + effectiveTier(state.equipment[slot]), 0)
   const armorPieces = ARMOR_SLOTS.filter((slot) => state.equipment[slot]?.id).length
   const armor = armorPieces > 0 ? armorTotal / armorPieces : 0
   const power = (1 + combatLevel * 0.18 + weapon * 0.45) * mods.combatPowerMult * potion.powerMult
   const toughness = (1 + combatLevel * 0.12 + armor * 0.5) * potion.toughnessMult
   const maxHp = Math.floor(30 + combatLevel * 8 + armor * 10 + (potion.maxHpBonus ?? 0))
-  const attackInterval = Math.max(0.45, Math.min(1.2, 1.15 / (0.75 + power / 6)))
+  const baseAttackInterval =
+    weaponType === "dagger" || weaponType === "scimitar" ? 2.4 : weaponType === "sword" ? 3.0 : 3.0
+  const attackInterval = baseAttackInterval
   return {
     power,
     toughness,

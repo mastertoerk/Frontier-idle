@@ -38,6 +38,9 @@ export function createDefaultState(now = Date.now()) {
       selectedCrop: null,
       sell: null,
       log: [],
+      toasts: [],
+      toastSeq: 0,
+      combatAuto: false,
     },
     legacy: {
       points: 0,

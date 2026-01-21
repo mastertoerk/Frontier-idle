@@ -25,6 +25,11 @@ body
     touch-action: pan-y;
 }
 
+#hud.hud--wide {
+    width: calc(100vw - 24px);
+    max-width: none;
+}
+
 .hud {
     min-height: 100%;
     padding: 12px;
@@ -376,6 +381,173 @@ body
 
 .logLine {
     line-height: 1.25;
+}
+
+.combatScreen {
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(8, 10, 18, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: grid;
+    gap: 12px;
+    min-height: clamp(220px, 32vh, 320px);
+}
+
+.combatLane {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-items: end;
+}
+
+.combatSide {
+    display: grid;
+    gap: 10px;
+}
+
+.combatSide--enemy {
+    text-align: right;
+}
+
+.combatAvatar {
+    position: relative;
+    height: 120px;
+    border-radius: 16px;
+    background: linear-gradient(140deg, rgba(86, 142, 255, 0.22), rgba(86, 255, 194, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.combatAvatar--enemy {
+    background: linear-gradient(140deg, rgba(255, 112, 112, 0.25), rgba(255, 186, 120, 0.08));
+}
+
+.combatAvatar__core {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(233, 238, 246, 0.8);
+}
+
+.hpBar {
+    display: grid;
+    gap: 6px;
+}
+
+.hpBar__label {
+    font-size: 11px;
+    color: rgba(233, 238, 246, 0.7);
+}
+
+.hpBar__track {
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hpBar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(120, 240, 120, 0.85), rgba(255, 120, 120, 0.85));
+    transition: width 120ms ease-out;
+}
+
+.combatActions {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 10px;
+    display: grid;
+    gap: 10px;
+}
+
+.combatInventory {
+    display: grid;
+    gap: 8px;
+}
+
+.combatInventory__title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(233, 238, 246, 0.6);
+}
+
+.attackBar {
+    display: grid;
+    gap: 6px;
+}
+
+.attackBar__label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(233, 238, 246, 0.55);
+}
+
+.attackBar__track {
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.attackBar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(86, 255, 194, 0.85), rgba(86, 142, 255, 0.85));
+    transition: width 80ms linear;
+}
+
+.attackBar--enemy .attackBar__fill {
+    background: linear-gradient(90deg, rgba(255, 120, 120, 0.85), rgba(255, 186, 120, 0.85));
+}
+
+.hit {
+    position: absolute;
+    top: 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+}
+
+.hit--player {
+    right: 10px;
+    color: #ffb2b2;
+}
+
+.hit--enemy {
+    left: 10px;
+    color: #ffd59c;
+}
+
+
+.toastStack {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(86, 142, 255, 0.2);
+    border: 1px solid rgba(86, 142, 255, 0.4);
+    font-size: 14px;
+    font-weight: 700;
+    color: #e9eef6;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
 }
 
 .saveBox {
