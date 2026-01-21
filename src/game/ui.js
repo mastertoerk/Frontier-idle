@@ -33,6 +33,16 @@ import {
   useCombatFood,
   useCombatPotion,
 } from "./expedition.js"
+import {
+  bossAttack,
+  exitDungeon,
+  moveDungeon,
+  queueDungeonAttack,
+  startDungeon,
+  toggleDungeonAuto,
+  useDungeonFood,
+  useDungeonPotion,
+} from "./dungeon.js"
 import { RECIPES } from "./recipes.js"
 import { computeModifiers } from "./modifiers.js"
 import { computePlayerCombat } from "./combat.js"
@@ -580,7 +590,7 @@ export function createUI({ root, store }) {
     `
   }
 
-	  function renderExpedition(state) {
+  function renderExpedition(state) {
 	    const e = state.expedition
 	    if (!e.active) {
       const canStart = COOKED_FISH.some((fish) => (state.resources[fish.id] ?? 0) > 0)
@@ -708,6 +718,100 @@ export function createUI({ root, store }) {
     `
 	  }
 
+  function renderDungeonMap(state) {
+    const d = state.dungeon
+    if (!d?.active) return ""
+    const tiles = []
+    for (let y = 0; y < d.height; y++) {
+      for (let x = 0; x < d.width; x++) {
+        const idx = y * d.width + x
+        const discovered = d.discovered?.[idx]
+        const tile = d.grid?.[y]?.[x] ?? "wall"
+        const isPlayer = d.player?.x === x && d.player?.y === y
+        const classes = ["tile"]
+        if (!discovered) {
+          classes.push("tile--fog")
+        } else if (tile === "wall") {
+          classes.push("tile--wall")
+        } else if (tile === "boss") {
+          classes.push("tile--boss")
+        } else {
+          classes.push("tile--floor")
+        }
+        if (isPlayer) classes.push("tile--player")
+        tiles.push(`<div class="${classes.join(" ")}"></div>`)
+      }
+    }
+    return `<div class="dungeonMap" style="--cols:${d.width}">${tiles.join("")}</div>`
+  }
+
+  function renderBossFight(state) {
+    const d = state.dungeon
+    const boss = d?.boss
+    if (!d?.active || d.mode !== "boss" || !boss) return ""
+    return `
+      <div class="bossScreen">
+        <div class="bossHud">
+          <div class="bossHp">
+            ${renderHpBar("You", boss.playerHp, boss.playerMaxHp)}
+            ${renderHpBar(boss.bossName, boss.bossHp, boss.bossMaxHp)}
+          </div>
+          <button class="btn btn--gear" data-action="dungeon-exit" aria-label="Exit dungeon">⚙</button>
+        </div>
+        <div class="bossView">
+          <div class="bossView__enemy">${escapeHtml(boss.bossName)}</div>
+        </div>
+        <div class="bossActions">
+          <button class="btn" data-action="boss-attack" ${boss.playerCd > 0 ? "disabled" : ""}>Attack</button>
+          <button class="btn" data-action="boss-food">Food</button>
+          <button class="btn" data-action="boss-potion">Potion</button>
+        </div>
+      </div>
+    `
+  }
+
+  function renderDungeon(state) {
+    const d = state.dungeon
+    if (!d?.active) {
+      return `
+        <div class="stack">
+          <div class="card">
+            <div class="card__title">Dungeon Mode</div>
+            <div class="muted">Explore a fogged dungeon, fight encounters, and defeat the boss.</div>
+            <div class="row">
+              <button class="btn" data-action="dungeon-start">Enter Dungeon</button>
+            </div>
+            ${d?.completed ? `<div class="muted small">Dungeon completed.</div>` : ""}
+          </div>
+        </div>
+      `
+    }
+
+    if (d.mode === "boss") {
+      return `<div class="stack">${renderBossFight(state)}</div>`
+    }
+
+    const showEncounter = d.mode === "encounter" && d.encounter?.combat
+    const encounterUi = showEncounter ? renderCombatEncounter(state, { combat: d.encounter.combat }) : ""
+
+    return `
+      <div class="stack">
+        <div class="card">
+          <div class="card__title">Dungeon Map</div>
+          ${renderDungeonMap(state)}
+          <div class="row">
+            <button class="btn" data-action="dungeon-move" data-dx="0" data-dy="-1">Up</button>
+            <button class="btn" data-action="dungeon-move" data-dx="-1" data-dy="0">Left</button>
+            <button class="btn" data-action="dungeon-move" data-dx="1" data-dy="0">Right</button>
+            <button class="btn" data-action="dungeon-move" data-dx="0" data-dy="1">Down</button>
+            <button class="btn btn--warn" data-action="dungeon-exit">Exit</button>
+          </div>
+        </div>
+        ${encounterUi}
+      </div>
+    `
+  }
+
   function renderPrestige(state) {
     const hall = state.buildings.townHall?.level ?? 0
     const bosses = state.expedition?.stats?.bossesDefeated ?? 0
@@ -766,6 +870,7 @@ export function createUI({ root, store }) {
     if (state.ui.tab === "skills") return renderSkills(state)
     if (state.ui.tab === "inventory") return renderInventory(state)
     if (state.ui.tab === "expedition") return renderExpedition(state)
+    if (state.ui.tab === "dungeon") return renderDungeon(state)
     if (state.ui.tab === "prestige") return renderPrestige(state)
     if (state.ui.tab === "settings") return renderSettings(state)
     return renderTown(state)
@@ -777,6 +882,7 @@ export function createUI({ root, store }) {
       ["town", "Town"],
       ["inventory", "Inventory"],
       ["expedition", "Expedition"],
+      ["dungeon", "Dungeon"],
       ["prestige", "Prestige"],
       ["settings", "Settings"],
     ]
@@ -1264,24 +1370,81 @@ export function createUI({ root, store }) {
     }
 
     if (action === "combat-attack") {
-      store.update((s) => queueCombatAttack(s))
+      store.update((s) => {
+        if (s.dungeon?.active && s.dungeon.mode === "encounter") {
+          queueDungeonAttack(s)
+        } else {
+          queueCombatAttack(s)
+        }
+      })
       return
     }
 
     if (action === "combat-auto") {
-      store.update((s) => toggleCombatAuto(s))
+      store.update((s) => {
+        if (s.dungeon?.active && s.dungeon.mode === "encounter") {
+          toggleDungeonAuto(s)
+        } else {
+          toggleCombatAuto(s)
+        }
+      })
       return
     }
 
     if (action === "combat-food") {
       const foodId = target.getAttribute("data-food")
-      store.update((s) => useCombatFood(s, foodId))
+      store.update((s) => {
+        if (s.dungeon?.active && s.dungeon.mode === "encounter") {
+          useDungeonFood(s, foodId)
+        } else {
+          useCombatFood(s, foodId)
+        }
+      })
       return
     }
 
     if (action === "combat-potion") {
       const potionId = target.getAttribute("data-potion")
-      store.update((s) => useCombatPotion(s, potionId))
+      store.update((s) => {
+        if (s.dungeon?.active && s.dungeon.mode === "encounter") {
+          useDungeonPotion(s, potionId)
+        } else {
+          useCombatPotion(s, potionId)
+        }
+      })
+      return
+    }
+
+    if (action === "dungeon-start") {
+      store.update((s) => startDungeon(s))
+      store.update((s) => setTab(s, "dungeon"))
+      return
+    }
+
+    if (action === "dungeon-move") {
+      const dx = Number(target.getAttribute("data-dx") || 0)
+      const dy = Number(target.getAttribute("data-dy") || 0)
+      store.update((s) => moveDungeon(s, dx, dy))
+      return
+    }
+
+    if (action === "dungeon-exit") {
+      store.update((s) => exitDungeon(s))
+      return
+    }
+
+    if (action === "boss-attack") {
+      store.update((s) => bossAttack(s))
+      return
+    }
+
+    if (action === "boss-food") {
+      store.update((s) => useDungeonFood(s))
+      return
+    }
+
+    if (action === "boss-potion") {
+      store.update((s) => useDungeonPotion(s))
       return
     }
 

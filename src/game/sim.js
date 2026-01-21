@@ -7,6 +7,7 @@ import { computeModifiers } from "./modifiers.js"
 import { pushLog } from "./log.js"
 import { RECIPES } from "./recipes.js"
 import { tickExpedition } from "./expedition.js"
+import { tickDungeon } from "./dungeon.js"
 
 function storageCapFor(state) {
   return computeModifiers(state).storageCap
@@ -290,6 +291,7 @@ export function tickSimulation(state, dtSec) {
   if (state.activity.type === "gather") tickGather(state, dt)
   if (state.activity.type === "craft") tickCraft(state, dt)
   if (state.activity.type === "expedition") tickExpedition(state, dt)
+  if (state.activity.type === "dungeon") tickDungeon(state, dt)
 
   if (state.ui?.toasts?.length) {
     state.ui.toasts = state.ui.toasts.filter((toast) => (toast.endsAt ?? 0) > state.meta.simTimeMs)

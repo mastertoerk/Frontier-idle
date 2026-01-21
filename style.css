@@ -620,3 +620,96 @@ body
     gap: 6px;
     flex-wrap: wrap;
 }
+
+.dungeonMap {
+    --cols: 10;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 16px);
+    gap: 3px;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.tile {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(30, 34, 45, 0.8);
+}
+
+.tile--wall {
+    background: rgba(12, 14, 20, 0.9);
+}
+
+.tile--floor {
+    background: rgba(70, 78, 96, 0.7);
+}
+
+.tile--boss {
+    background: rgba(98, 190, 120, 0.7);
+}
+
+.tile--fog {
+    background: rgba(0, 0, 0, 0.85);
+    border-color: rgba(0, 0, 0, 0.9);
+}
+
+.tile--player {
+    box-shadow: 0 0 0 2px rgba(86, 142, 255, 0.7);
+}
+
+.bossScreen {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(6, 8, 14, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bossHud {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.bossHp {
+    display: grid;
+    gap: 8px;
+    flex: 1;
+}
+
+.bossView {
+    height: 220px;
+    border-radius: 16px;
+    background: radial-gradient(circle at center, rgba(62, 180, 110, 0.25), rgba(6, 8, 14, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bossView__enemy {
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(233, 238, 246, 0.85);
+}
+
+.bossActions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.btn--gear {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+}

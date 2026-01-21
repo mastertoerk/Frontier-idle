@@ -98,5 +98,21 @@ export function createDefaultState(now = Date.now()) {
         bossesDefeated: 0,
       },
     },
+    dungeon: {
+      active: false,
+      mode: "idle", // idle | explore | encounter | boss
+      width: 0,
+      height: 0,
+      grid: [],
+      discovered: [],
+      player: { x: 0, y: 0 },
+      steps: 0,
+      encounterCooldown: 0,
+      encounter: null,
+      boss: null,
+      completed: false,
+      seed: 0,
+      feed: [],
+    },
   }
 }
