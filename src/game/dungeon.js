@@ -165,7 +165,7 @@ function createEncounterCombat(state, difficulty = 1) {
     rng: { t: (Date.now() ^ 0xbeef) >>> 0 },
     damageTaken: 0,
     started: false,
-    autoFight: false,
+    autoFight: true,
     playerQueued: 0,
     lastAutoEatAt: 0,
     buffPotionUsed: !!(state.potion?.active && state.potion.active.kind !== "heal"),
@@ -313,6 +313,8 @@ export function moveDungeon(state, dx, dy) {
   if (nx < 0 || ny < 0 || nx >= d.width || ny >= d.height) return
   const tile = d.grid[ny][nx]
   if (!isWalkable(tile)) return
+  const idx = ny * d.width + nx
+  const wasDiscovered = !!d.discovered?.[idx]
   d.player.x = nx
   d.player.y = ny
   discoverTile(state, nx, ny)
@@ -327,7 +329,7 @@ export function moveDungeon(state, dx, dy) {
   }
 
   const encounterChance = 0.18
-  if (d.encounterCooldown <= 0 && Math.random() < encounterChance) {
+  if (!wasDiscovered && d.encounterCooldown <= 0 && Math.random() < encounterChance) {
     d.mode = "encounter"
     const difficulty = 1 + Math.floor(d.steps / 8)
     d.encounter = { combat: createEncounterCombat(state, difficulty) }

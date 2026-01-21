@@ -182,10 +182,11 @@ export function createUI({ root, store }) {
     const skills = ["woodcutting", "mining", "fishing", "scavenging", "farming", "smithing", "cooking", "alchemy"]
     const rows = skills
       .map((sid) => {
+        const lvl = nextLevelProgress(state.skills[sid]?.xp ?? 0).level
         const active = selected === sid ? "btn btn--tier btn--tier-active" : "btn btn--tier"
         return `<button class="${active}" data-action="select-skill" data-skill="${escapeHtml(
           sid
-        )}">${escapeHtml(SKILLS[sid]?.name ?? sid)}</button>`
+        )}">${escapeHtml(SKILLS[sid]?.name ?? sid)} <span class="muted">Lv ${lvl}</span></button>`
       })
       .join("")
     return `
@@ -799,11 +800,13 @@ export function createUI({ root, store }) {
         <div class="card">
           <div class="card__title">Dungeon Map</div>
           ${renderDungeonMap(state)}
+          <div class="dpad">
+            <button class="btn dpad__btn" data-action="dungeon-move" data-dx="0" data-dy="-1">↑</button>
+            <button class="btn dpad__btn" data-action="dungeon-move" data-dx="-1" data-dy="0">←</button>
+            <button class="btn dpad__btn" data-action="dungeon-move" data-dx="1" data-dy="0">→</button>
+            <button class="btn dpad__btn" data-action="dungeon-move" data-dx="0" data-dy="1">↓</button>
+          </div>
           <div class="row">
-            <button class="btn" data-action="dungeon-move" data-dx="0" data-dy="-1">Up</button>
-            <button class="btn" data-action="dungeon-move" data-dx="-1" data-dy="0">Left</button>
-            <button class="btn" data-action="dungeon-move" data-dx="1" data-dy="0">Right</button>
-            <button class="btn" data-action="dungeon-move" data-dx="0" data-dy="1">Down</button>
             <button class="btn btn--warn" data-action="dungeon-exit">Exit</button>
           </div>
         </div>
