@@ -727,10 +727,17 @@ export function createUI({ root, store }) {
       for (let x = 0; x < d.width; x++) {
         const idx = y * d.width + x
         const discovered = d.discovered?.[idx]
+        const neighborDiscovered =
+          d.discovered?.[idx - 1] ||
+          d.discovered?.[idx + 1] ||
+          d.discovered?.[idx - d.width] ||
+          d.discovered?.[idx + d.width]
         const tile = d.grid?.[y]?.[x] ?? "wall"
         const isPlayer = d.player?.x === x && d.player?.y === y
         const classes = ["tile"]
-        if (!discovered) {
+        if (!discovered && tile === "wall" && neighborDiscovered) {
+          classes.push("tile--wall")
+        } else if (!discovered) {
           classes.push("tile--fog")
         } else if (tile === "wall") {
           classes.push("tile--wall")
