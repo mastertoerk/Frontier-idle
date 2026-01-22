@@ -250,6 +250,8 @@ function createBossCombat(state) {
     bossCd: 1.2,
     started: false,
     buffPotionUsed: !!(state.potion?.active && state.potion.active.kind !== "heal"),
+    attackSeq: 0,
+    hitSeq: 0,
   }
 }
 
@@ -270,6 +272,7 @@ function tickBossCombat(state, combat, dtSec) {
     const reduced = Math.max(0, Math.floor(base - combat.playerToughness * 1.1))
     const dmg = Math.max(0, reduced)
     combat.playerHp = Math.max(0, combat.playerHp - dmg)
+    if (dmg > 0) combat.attackSeq += 1
   }
 }
 
@@ -453,4 +456,5 @@ export function bossAttack(state) {
   const base = (0.85 + Math.random() * 0.5) * (2 + d.boss.playerPower * 3.0)
   const dmg = Math.max(1, Math.floor(base))
   d.boss.bossHp = Math.max(0, d.boss.bossHp - dmg)
+  d.boss.hitSeq += 1
 }

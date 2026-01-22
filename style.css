@@ -624,15 +624,15 @@ body
 .dungeonMap {
     --cols: 10;
     display: grid;
-    grid-template-columns: repeat(var(--cols), 16px);
-    gap: 3px;
+    grid-template-columns: repeat(var(--cols), 12px);
+    gap: 2px;
     justify-content: center;
     padding: 10px 0;
 }
 
 .tile {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     border-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(30, 34, 45, 0.8);
@@ -731,12 +731,10 @@ body
     justify-content: center;
 }
 
-.bossView__enemy {
-    font-size: 18px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(233, 238, 246, 0.85);
+.bossCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 .bossActions {

@@ -43,6 +43,7 @@ import {
   useDungeonFood,
   useDungeonPotion,
 } from "./dungeon.js"
+import { BlobBossFP } from "./blobBoss.js"
 import { RECIPES } from "./recipes.js"
 import { computeModifiers } from "./modifiers.js"
 import { computePlayerCombat } from "./combat.js"
@@ -86,6 +87,12 @@ export function createUI({ root, store }) {
   let deferTimer = null
   let interactionLockUntil = 0
   let suppressClickUntil = 0
+  let bossCanvas = null
+  let bossCtx = null
+  let bossBlob = null
+  let bossLastAttackSeq = 0
+  let bossLastHitSeq = 0
+  let bossAnimTime = 0
 
   function noteInteraction(durationMs = 400) {
     if (durationMs <= 0) return
@@ -195,6 +202,24 @@ export function createUI({ root, store }) {
         <div class="row">${rows}</div>
       </div>
     `
+  }
+
+  function renderActiveResourceLine(state, skillId) {
+    if (!skillId) return ""
+    const resourceId =
+      skillId === "woodcutting"
+        ? "wood"
+        : skillId === "mining"
+          ? state.activity.gatherResource ?? "dullstoneOre"
+          : skillId === "fishing"
+            ? (FISHING_NODES.find((node) => node.id === state.activity.gatherResource)?.rawId ?? null)
+            : skillId === "scavenging"
+              ? null
+              : null
+    if (!resourceId) return ""
+    const name = RESOURCES[resourceId]?.name ?? resourceId
+    const owned = state.resources[resourceId] ?? 0
+    return `<div class="muted small">Resource: ${escapeHtml(name)} — ${formatInt(owned)} owned</div>`
   }
 
   function renderMiningTargets(state) {
@@ -460,6 +485,7 @@ export function createUI({ root, store }) {
             <div class="muted small">${formatInt(Math.floor(activeProgress.xpIntoLevel))} / ${formatInt(
               activeProgress.xpForNext
             )} XP</div>
+            ${renderActiveResourceLine(state, activeSkillId)}
           </div>
         `
         : ""
@@ -767,7 +793,7 @@ export function createUI({ root, store }) {
           <button class="btn btn--gear" data-action="dungeon-exit" aria-label="Exit dungeon">⚙</button>
         </div>
         <div class="bossView">
-          <div class="bossView__enemy">${escapeHtml(boss.bossName)}</div>
+          <canvas id="bossCanvas" class="bossCanvas" aria-hidden="true"></canvas>
         </div>
         <div class="bossActions">
           <button class="btn" data-action="boss-attack" ${boss.playerCd > 0 ? "disabled" : ""}>Attack</button>
@@ -1319,6 +1345,74 @@ export function createUI({ root, store }) {
     }
   }
 
+  function ensureBossCanvas() {
+    const canvas = /** @type {HTMLCanvasElement | null} */ (root.querySelector("#bossCanvas"))
+    if (!canvas) {
+      bossCanvas = null
+      bossCtx = null
+      bossBlob = null
+      return
+    }
+    if (bossCanvas !== canvas) {
+      bossCanvas = canvas
+      bossCtx = canvas.getContext("2d")
+      bossBlob = null
+      bossLastAttackSeq = 0
+      bossLastHitSeq = 0
+    }
+  }
+
+  function tickBossCanvas(nowMs) {
+    requestAnimationFrame(tickBossCanvas)
+    const state = store.getState()
+    if (!state.dungeon?.active || state.dungeon.mode !== "boss") return
+    ensureBossCanvas()
+    if (!bossCanvas || !bossCtx) return
+
+    const rect = bossCanvas.getBoundingClientRect()
+    const dpr = window.devicePixelRatio || 1
+    const targetW = Math.max(240, Math.floor(rect.width))
+    const targetH = Math.max(180, Math.floor(rect.height))
+    const needResize = bossCanvas.width !== targetW * dpr || bossCanvas.height !== targetH * dpr
+    if (needResize) {
+      bossCanvas.width = targetW * dpr
+      bossCanvas.height = targetH * dpr
+      bossCanvas.style.width = `${targetW}px`
+      bossCanvas.style.height = `${targetH}px`
+      bossCtx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+
+    if (!bossBlob) {
+      bossBlob = new BlobBossFP({
+        x: targetW / 2,
+        y: targetH * 0.6,
+        baseRadius: Math.min(targetW, targetH) * 0.32,
+        lungePos: 24,
+      })
+    } else {
+      bossBlob.setAnchor(targetW / 2, targetH * 0.6)
+    }
+
+    const dt = Math.min(0.05, (nowMs - bossAnimTime) / 1000 || 0.016)
+    bossAnimTime = nowMs
+
+    const boss = state.dungeon.boss
+    if (boss) {
+      if (boss.attackSeq !== bossLastAttackSeq) {
+        bossLastAttackSeq = boss.attackSeq
+        bossBlob.attack()
+      }
+      if (boss.hitSeq !== bossLastHitSeq) {
+        bossLastHitSeq = boss.hitSeq
+        bossBlob.hitReact()
+      }
+    }
+
+    bossBlob.update(dt)
+    bossCtx.clearRect(0, 0, targetW, targetH)
+    bossBlob.render(bossCtx)
+  }
+
   function handleAction(target) {
     if (!target) return
     const action = target.getAttribute("data-action")
@@ -1662,6 +1756,7 @@ export function createUI({ root, store }) {
   root.addEventListener("pointermove", onPointerMove, { passive: true })
   root.addEventListener("wheel", onWheel, { passive: true })
   const unsub = store.subscribe(scheduleRender)
+  requestAnimationFrame(tickBossCanvas)
   render()
 
   return {
